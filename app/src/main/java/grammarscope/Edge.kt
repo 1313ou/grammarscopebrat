@@ -1,20 +1,21 @@
-package com.bbou.brats
+package grammarscope
 
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Paint.FontMetrics
 import android.graphics.PointF
 import android.graphics.RectF
 import android.graphics.Typeface
-import com.bbou.brats.Utils.drawDot
-import com.bbou.brats.Utils.drawTriangle
+import grammarscope.CurvePath
+import grammarscope.Utils.drawDot
+import grammarscope.Utils.drawTriangle
+import grammarscope.Utils.height
 import kotlin.math.atan2
 
 /**
  * Edge as used by renderer
  */
-internal class Edge
+class Edge
     (
     /**
      * Edge x left coordinate
@@ -55,7 +56,7 @@ internal class Edge
     /**
      * Edge color
      */
-    val color: Color,
+    val color: Int,
     /**
      * Whether this edge is continued on next line
      */
@@ -116,7 +117,7 @@ internal class Edge
         if (isVertical) {
 
             // tag width
-            val tagFontHeight = tagMetrics.descent - tagMetrics.ascent + tagMetrics.leading
+            val tagFontHeight = tagMetrics.height()
             val tagFontDescent = tagMetrics.descent
             tagWidth = tagFontHeight.toInt()
             val paint = Paint()
@@ -150,7 +151,7 @@ internal class Edge
             tagPosition = PointF(labelLeft, labelBase)
 
             // tag rectangle
-            val tagFontHeight: Float = tagMetrics.descent - tagMetrics.ascent + tagMetrics.leading
+            val tagFontHeight: Float = tagMetrics.height()
             val x = tagPosition.x - LABEL_INFLATE
             val y = (yBase - LABEL_BOTTOM_INSET - LABEL_INFLATE - tagFontHeight - LABEL_INFLATE)
             val w = tagWidth + 2 * LABEL_INFLATE
@@ -315,8 +316,9 @@ internal class Edge
     }
 
     companion object {
-        lateinit var tagFont: Typeface
-        lateinit var tagMetrics: FontMetrics
+        var tagFont: Typeface = Typeface.SANS_SERIF
+
+        var tagMetrics: Paint.FontMetrics = Paint.FontMetrics()
 
         var labelColor = 0x000000
         var edgeColor = 0x000000
@@ -330,6 +332,136 @@ internal class Edge
 
         val LABEL_BOTTOM_INSET = 0F
         val LABEL_INFLATE = 0F
+
+        const val DEFAULT_EDGE_COLOR: Int = Color.DKGRAY
+        const val DEFAULT_LABEL_COLOR: Int = Color.DKGRAY
+        const val DEFAULT_ARROW_TIP_COLOR: Int = Color.DKGRAY
+        const val DEFAULT_ARROW_START_COLOR: Int = Color.GRAY
+
+
+        /**
+         * Set label color
+         *
+         * @param color color
+         */
+        fun setLabelColor(color: Int?) {
+            labelColor = color ?: DEFAULT_LABEL_COLOR
+        }
+
+        /**
+         * Set edge color
+         *
+         * @param color color
+         */
+        fun setEdgeColor(color: Int?) {
+            edgeColor = color ?: DEFAULT_EDGE_COLOR
+        }
+
+        /**
+         * Set arrow tip color
+         *
+         * @param color color
+         */
+        fun setArrowTipColor(color: Int?) {
+            arrowTipColor = color ?: DEFAULT_ARROW_TIP_COLOR
+        }
+
+        /**
+         * Set arrow start color
+         *
+         * @param color color
+         */
+        fun setArrowStartColor(color: Int?) {
+            arrowStartColor = color ?: DEFAULT_ARROW_START_COLOR
+        }
+
+
+        /**
+         * Make edge
+         *
+         * @param fromX           x from
+         * @param toX             x to
+         * @param baseY           base y
+         * @param fromAnchorX     x anchor from
+         * @param toAnchorX       x anchor to
+         * @param yAnchor         y anchor
+         * @param height          height
+         * @param label           label
+         * @param color           color
+         * @param isBackwards     whether edge is backwards
+         * @param isLeftTerminal  whether this edge left-terminates
+         * @param isRightTerminal whether this edge right-terminates
+         * @param bottom          pad bottom
+         * @param isVisible       whether this edge is visible
+         * @param graphEdge       graph edge
+         */
+         fun makeEdge(
+            fromX: Int,
+            toX: Int,
+            baseY: Int,
+            fromAnchorX: Int,
+            toAnchorX: Int,
+            yAnchor: Int,
+            height: Int,
+            label: String?,
+            color: Int,
+            isBackwards: Boolean,
+            isLeftTerminal: Boolean,
+            isRightTerminal: Boolean,
+            bottom: Int,
+            isVisible: Boolean
+        ): Edge {
+            // edge
+            val width = toX + toAnchorX - (fromX + fromAnchorX)
+
+            // truncate if needed to fit in
+            var isVertical = false
+            var truncatedLabel: String? = truncate(label, width - TRUNCATE_MARGIN, tagMetrics)
+            if (truncatedLabel == null) {
+                if (LABEL_STAND_IN_CHAR != null) truncatedLabel = LABEL_STAND_IN_CHAR
+                else {
+                    truncatedLabel = label
+                    if (truncatedLabel!!.length > LABEL_VERTICAL_TRUNCATE) truncatedLabel = label.substring(0, LABEL_VERTICAL_TRUNCATE.coerceAtMost(label.length)) + '⋯'
+                    isVertical = true
+                }
+            }
+
+            // edge
+            val edge = Edge(
+                fromX.toFloat(),
+                toX.toFloat(),
+                baseY.toFloat(),
+                fromAnchorX.toFloat(),
+                toAnchorX.toFloat(),
+                yAnchor.toFloat(),
+                height.toFloat(),
+                truncatedLabel,
+                isVertical,
+                color,
+                isBackwards,
+                isLeftTerminal,
+                isRightTerminal,
+                bottom,
+                isVisible
+            )
+
+            return edge
+        }
+
+        /**
+         * Character used when there is not enough space. I f null, label will be truncated, and rotated 90°
+         */
+        val LABEL_STAND_IN_CHAR: String? = null // "▾"; // "↓▾▿☟"
+
+        /**
+         * Truncate length when label is vertical
+         */
+        const val LABEL_VERTICAL_TRUNCATE: Int = 4
+
+        const val TRUNCATE_MARGIN = 0
+
+        fun truncate(label: String?, width: Int, metrics: Paint.FontMetrics): String {
+            return ""
+        }
     }
 }
-

@@ -1,4 +1,4 @@
-package com.bbou.brats
+package grammarscope
 
 import android.graphics.Path
 import android.graphics.PointF
