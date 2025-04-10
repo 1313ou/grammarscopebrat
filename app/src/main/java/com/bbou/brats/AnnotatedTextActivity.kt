@@ -3,6 +3,7 @@ package com.bbou.brats
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
+import com.bbou.brats.Annotation.Icon.IconType
 
 class AnnotatedTextActivity : AppCompatActivity() {
 
