@@ -1,8 +1,8 @@
 package com.bbou.brats
 
-import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.toColorInt
 
 class AnnotatedTextActivity : AppCompatActivity() {
 
@@ -10,18 +10,20 @@ class AnnotatedTextActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.annotated_text)
         val textView = findViewById<AnnotatedTextView>(R.id.annotated_text)
-        val lineSpacingExtra = 100f
-        val lineSpacingMultiplier = 5.0f // Default multiplier
+        val lineSpacingExtra = 200f
+        val lineSpacingMultiplier = 1.0f // Default multiplier
 
         textView.setLineSpacing(lineSpacingExtra, lineSpacingMultiplier)
         fill(textView)
     }
 
     fun fill(textView: AnnotatedTextView) {
-         val text = """This is the first line of text.
+        val text = """
+            This is the first line of text.
             Here is another line with some important concepts.
             The third line shows relationships between words.
             This is the final line of our example.""".trimIndent()
+        textView.text = text
 
         // Find word positions
         val firstLineWordPos = findWordPosition(text, "first")
@@ -64,12 +66,12 @@ class AnnotatedTextActivity : AppCompatActivity() {
 
         // Highlight some words
         if (importantWordPos != null) {
-            textView.highlightWord(importantWordPos.first, importantWordPos.second, Color.parseColor("#FFEB3B"))
+            textView.highlightWord(importantWordPos.first, importantWordPos.second, "#FFEB3B".toColorInt())
         }
 
-        //if (relationshipsWordPos != null) {
-        //    textView.highlightWord(relationshipsWordPos.first, relationshipsWordPos.second, Color.parseColor("#B3E5FC"))
-        //}
+        if (relationshipsWordPos != null) {
+            textView.highlightWord(relationshipsWordPos.first, relationshipsWordPos.second, "#B3E5FC".toColorInt())
+        }
     }
 
     /**

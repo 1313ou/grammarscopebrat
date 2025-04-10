@@ -21,14 +21,14 @@ object Utils {
     @JvmStatic
     fun Canvas.drawTriangle(x0: Float, y0: Float, w: Float, h2: Float, reverse: Boolean, rotation: Float, paint: Paint) {
         val trianglePath = triangle(x0, y0, w, h2, reverse)
-        val saveCount = save()
+        save()
         try {
             translate(x0, y0)
             rotate(rotation)
             translate(-x0, -y0)
             drawPath(trianglePath, paint)
         } finally {
-            restoreToCount(saveCount)
+            restore()
         }
     }
 

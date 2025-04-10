@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:text="First line of text\nSecond line with space above\nThird line with annotations\nFourth line showing connections"
+        android:text="First line\nSecond line\nThird line\nFourth line"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

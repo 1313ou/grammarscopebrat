@@ -11,6 +11,8 @@ import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
+import kotlin.math.cos
+import kotlin.math.sin
 
 class AnnotatedTextView @JvmOverloads constructor(
     context: Context,
@@ -18,7 +20,9 @@ class AnnotatedTextView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : AppCompatTextView(context, attrs, defStyleAttr) {
 
-    private val paint = Paint().apply {
+    private val annotations = mutableListOf<Annotation>()
+
+    private val drawPaint = Paint().apply {
         color = Color.RED
         strokeWidth = 3f
         style = Paint.Style.STROKE
@@ -30,9 +34,6 @@ class AnnotatedTextView @JvmOverloads constructor(
         style = Paint.Style.FILL
         isAntiAlias = true
     }
-
-    private val arrowPath = Path()
-    private val annotations = mutableListOf<Annotation>()
 
     /**
      * Add an arrow between lines connecting two words
@@ -69,14 +70,12 @@ class AnnotatedTextView @JvmOverloads constructor(
         } else {
             SpannableString(text)
         }
-
         spannable.setSpan(
             BackgroundColorSpan(color),
             wordStart,
             wordEnd,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
-
         text = spannable
     }
 
@@ -92,6 +91,8 @@ class AnnotatedTextView @JvmOverloads constructor(
         // Draw text
         super.onDraw(canvas)
 
+        drawLineSpace(canvas)
+
         // Draw all annotations
         for (annotation in annotations) {
             when (annotation) {
@@ -101,7 +102,69 @@ class AnnotatedTextView @JvmOverloads constructor(
         }
     }
 
+    private fun drawLineSpace(canvas: Canvas) {
+        val paintTop = Paint().apply {
+            color = Color.MAGENTA
+            strokeWidth = 2f
+            style = Paint.Style.STROKE
+        }
+        val paintBottom = Paint().apply {
+            color = Color.CYAN
+            strokeWidth = 2f
+            style = Paint.Style.STROKE
+        }
+        val paintBase = Paint().apply {
+            color = Color.BLUE
+            strokeWidth = 2f
+            style = Paint.Style.STROKE
+        }
+        val paintAsDesCent = Paint().apply {
+            color = Color.GREEN
+            strokeWidth = 2f
+            style = Paint.Style.STROKE
+        }
+        val paint: Paint = this.paint
+        val fontMetrics = paint.fontMetrics
+        val ascent = fontMetrics.ascent
+        val descent = fontMetrics.descent
+        val leading = fontMetrics.leading
+        val height = -ascent + descent + leading
+
+        val lineCount = layout.lineCount
+        for (line in 0 until lineCount) {
+            // Get the top and the bottom of the line.
+            val top = layout.getLineTop(line).toFloat() + paddingTop
+            val bottom = layout.getLineBottom(line).toFloat() + paddingTop
+            val base = layout.getLineBaseline(line).toFloat() + paddingTop
+            val lineAscent = layout.getLineAscent(line).toFloat()
+            val lineDescent = layout.getLineDescent(line).toFloat()
+
+            // Print the positions.
+            println("Line $line: Top = $top, Bottom = $bottom, Base = $base, Height = $height, Ascent= $ascent, Descent = $descent, Leading = $leading")
+
+            // Add a line at the top and bottom.
+            val x1 = 0f
+            val x2 = 500f
+            val x3 = 1000f
+            canvas.drawLine(x1, base, x2, base, paintBase)
+            canvas.drawLine(x1, base + ascent, x2, base + ascent, paintAsDesCent)
+            canvas.drawLine(x1, base + descent, x2, base + descent, paintAsDesCent)
+
+            canvas.drawLine(x2, top, x3, top, paintTop)
+            canvas.drawLine(x2, bottom, x3, bottom, paintBottom)
+        }
+    }
+
     private fun drawBetweenLinesArrow(canvas: Canvas, arrow: Annotation.Arrow) {
+        val arrowPath = Path()
+
+        val paint: Paint = this.paint
+        val fontMetrics = paint.fontMetrics
+        val ascent = fontMetrics.ascent
+        val descent = fontMetrics.descent
+        val leading = fontMetrics.leading
+        val height = -ascent + descent + leading
+
         val fromWordPos = getWordPosition(arrow.fromWordStart, arrow.fromWordEnd)
         val toWordPos = getWordPosition(arrow.toWordStart, arrow.toWordEnd)
 
@@ -117,7 +180,7 @@ class AnnotatedTextView @JvmOverloads constructor(
                 val toWordX = (toWordPos.left + toWordPos.right) / 2f
 
                 // Get bottom of first line and top of second line
-                val fromLineBottom = layout.getLineBottom(fromLine).toFloat() + paddingTop
+                val fromLineBottom = layout.getLineTop(fromLine).toFloat() + paddingTop + height
                 val toLineTop = layout.getLineTop(toLine).toFloat() + paddingTop
 
                 // Calculate positions in the space between lines
@@ -126,7 +189,7 @@ class AnnotatedTextView @JvmOverloads constructor(
                 // Draw arrow in the space between lines
                 if (fromLine < toLine) {
                     // Downward arrow
-                    canvas.drawLine(fromWordX, fromLineBottom, toWordX, toLineTop, paint)
+                    canvas.drawLine(fromWordX, fromLineBottom, toWordX, toLineTop, drawPaint)
 
                     // Draw arrowhead
                     val arrowSize = 10f
@@ -139,7 +202,7 @@ class AnnotatedTextView @JvmOverloads constructor(
                     canvas.drawPath(arrowPath, fillPaint)
                 } else {
                     // Upward arrow
-                    canvas.drawLine(fromWordX, fromLineBottom, toWordX, toLineTop, paint)
+                    canvas.drawLine(fromWordX, fromLineBottom, toWordX, toLineTop, drawPaint)
 
                     // Draw arrowhead
                     val arrowSize = 10f
@@ -167,44 +230,68 @@ class AnnotatedTextView @JvmOverloads constructor(
                 // Calculate center of the word
                 val wordCenterX = (wordPos.left + wordPos.right) / 2f
 
+                val paint: Paint = this.paint
+                val fontMetrics = paint.fontMetrics
+                val ascent = fontMetrics.ascent
+                val descent = fontMetrics.descent
+                val leading = fontMetrics.leading
+                val height = -ascent + descent + leading
+
                 // Get bottom of current line and top of next line
-                val lineBottom = layout.getLineBottom(line).toFloat() + paddingTop
+                val lineTop = layout.getLineTop(line).toFloat() + paddingTop
+                val lineBottom = lineTop + height
+                //val lineBottom = layout.getLineBottom(line).toFloat() + paddingTop
+                //val lineHeight = lineBottom - lineTop
                 val nextLineTop = layout.getLineTop(line + 1).toFloat() + paddingTop
 
                 // Draw in the middle of the space between lines
                 val iconY = (lineBottom + nextLineTop) / 2f
 
+                // Calculate the available space for the icon
+                val availableSpace = (nextLineTop - lineBottom) / 2f
+                val iconSize = availableSpace.coerceAtMost(20f) // Cap the icon size
+
                 when (icon.type) {
                     IconType.STAR -> {
-                        val radius = (nextLineTop - lineBottom) / 3f
+                        val radius = iconSize
                         for (i in 0 until 5) {
                             val angle = Math.PI / 2 + i * 2 * Math.PI / 5
                             val nextAngle = angle + Math.PI / 5
 
-                            val outerX1 = wordCenterX + radius * Math.cos(angle).toFloat()
-                            val outerY1 = iconY - radius * Math.sin(angle).toFloat()
+                            val outerX1 = wordCenterX + radius * cos(angle).toFloat()
+                            val outerY1 = iconY - radius * sin(angle).toFloat()
 
-                            val innerX = wordCenterX + radius * 0.4f * Math.cos(angle + Math.PI / 5).toFloat()
-                            val innerY = iconY - radius * 0.4f * Math.sin(angle + Math.PI / 5).toFloat()
+                            val innerX = wordCenterX + radius * 0.4f * cos(angle + Math.PI / 5).toFloat()
+                            val innerY = iconY - radius * 0.4f * sin(angle + Math.PI / 5).toFloat()
 
-                            val outerX2 = wordCenterX + radius * Math.cos(nextAngle).toFloat()
-                            val outerY2 = iconY - radius * Math.sin(nextAngle).toFloat()
+                            val outerX2 = wordCenterX + radius * cos(nextAngle).toFloat()
+                            val outerY2 = iconY - radius * sin(nextAngle).toFloat()
 
-                            canvas.drawLine(outerX1, outerY1, innerX, innerY, paint)
-                            canvas.drawLine(innerX, innerY, outerX2, outerY2, paint)
+                            canvas.drawLine(outerX1, outerY1, innerX, innerY, drawPaint)
+                            canvas.drawLine(innerX, innerY, outerX2, outerY2, drawPaint)
                         }
                     }
 
                     IconType.CIRCLE -> {
-                        val radius = (nextLineTop - lineBottom) / 3f
-                        canvas.drawCircle(wordCenterX, iconY, radius, paint)
+                        canvas.drawCircle(wordCenterX, iconY, iconSize, drawPaint)
                     }
 
                     IconType.ARROW_DOWN -> {
-                        val arrowSize = (nextLineTop - lineBottom) / 3f
-                        canvas.drawLine(wordCenterX, iconY - arrowSize, wordCenterX, iconY + arrowSize, paint)
-                        canvas.drawLine(wordCenterX - arrowSize, iconY, wordCenterX, iconY + arrowSize, paint)
-                        canvas.drawLine(wordCenterX + arrowSize, iconY, wordCenterX, iconY + arrowSize, paint)
+                        // Draw vertical line
+                        canvas.drawLine(wordCenterX, iconY - iconSize, wordCenterX, iconY + iconSize, drawPaint)
+                        // Draw arrow head
+                        canvas.drawLine(wordCenterX - iconSize / 2, iconY + iconSize / 2, wordCenterX, iconY + iconSize, drawPaint)
+                        canvas.drawLine(wordCenterX + iconSize / 2, iconY + iconSize / 2, wordCenterX, iconY + iconSize, drawPaint)
+                    }
+
+                    IconType.DIAMOND -> {
+                        val path = Path()
+                        path.moveTo(wordCenterX, iconY - iconSize)  // Top
+                        path.lineTo(wordCenterX + iconSize, iconY)  // Right
+                        path.lineTo(wordCenterX, iconY + iconSize)  // Bottom
+                        path.lineTo(wordCenterX - iconSize, iconY)  // Left
+                        path.close()
+                        canvas.drawPath(path, drawPaint)
                     }
                 }
             }
@@ -214,7 +301,7 @@ class AnnotatedTextView @JvmOverloads constructor(
     /**
      * Get the screen position of a word
      */
-    private fun getWordPosition(wordStart: Int, wordEnd: Int): Rect? {
+    fun getWordPosition(wordStart: Int, wordEnd: Int): Rect? {
         if (wordStart < 0 || wordEnd > text.length || layout == null) {
             return null
         }
@@ -247,7 +334,7 @@ class AnnotatedTextView @JvmOverloads constructor(
      * Set the paint color for annotations
      */
     fun setAnnotationColor(color: Int) {
-        paint.color = color
+        drawPaint.color = color
         fillPaint.color = color
         invalidate()
     }
@@ -267,5 +354,5 @@ sealed class Annotation {
 }
 
 enum class IconType {
-    STAR, CIRCLE, ARROW_DOWN
+    STAR, CIRCLE, DIAMOND, ARROW_DOWN;
 }
