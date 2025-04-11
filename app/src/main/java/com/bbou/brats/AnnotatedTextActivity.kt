@@ -40,7 +40,8 @@ class AnnotatedTextActivity : AppCompatActivity() {
         // renderer
         renderer = SemanticGraphRenderer(textView, true)
         renderer.layout(document, textView)
-
+        //textView.annotations.addAll(renderer.boxes)
+        textView.annotations.addAll(renderer.edges)
     }
 
     /**

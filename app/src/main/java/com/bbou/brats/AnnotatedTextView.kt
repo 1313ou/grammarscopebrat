@@ -23,7 +23,7 @@ class AnnotatedTextView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : AppCompatTextView(context, attrs, defStyleAttr) {
 
-    private val annotations = mutableListOf<Annotation>()
+    internal val annotations = mutableListOf<Annotation>()
 
     /**
      * Add an icon below a specific word (in the space between lines)

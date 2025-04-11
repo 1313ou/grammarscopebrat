@@ -10,6 +10,7 @@ import androidx.core.graphics.toColorInt
 import com.bbou.brats.Annotation
 import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
+import grammarscope.Edge.Companion.makeEdge
 import grammarscope.allocator.Allocator
 import grammarscope.document.Document
 import grammarscope.document.Graph
@@ -80,12 +81,12 @@ class SemanticGraphRenderer(
     /**
      * Edges to draw
      */
-    private val edges: MutableCollection<EdgeAnnotation> = ArrayList()
+    internal val edges: MutableCollection<EdgeAnnotation> = ArrayList()
 
     /**
      * Boxes to draw
      */
-    private val boxes: MutableCollection<BoxAnnotation> = ArrayList()
+    internal val boxes: MutableCollection<BoxAnnotation> = ArrayList()
 
     // L A Y O U T
 
@@ -173,7 +174,7 @@ class SemanticGraphRenderer(
                     val yAnchor: Float = leftRectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
                     val bottom = leftRectangle.top + lineHeight + padTopOffset + padHeight
 
-                    val e: Edge = Edge.Companion.makeEdge(xEdge1, xEdge2, yEdge.toInt(), xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, true, true, bottom, isVisible)
+                    val e: Edge = makeEdge(xEdge1, xEdge2, yEdge.toInt(), xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, true, true, bottom, isVisible)
                     this.edges.add(EdgeAnnotation(e))
 
                 } else {
@@ -254,7 +255,6 @@ class SemanticGraphRenderer(
                 }
             }
         }
-
         return this.height
     }
 
