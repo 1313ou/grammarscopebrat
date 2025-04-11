@@ -13,11 +13,9 @@ import android.util.AttributeSet
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.graphics.toColorInt
-import com.bbou.brats.Annotation.BoxAnnotation
-import com.bbou.brats.Annotation.EdgeAnnotation
-import grammarscope.SemanticGraphPainter
+import com.bbou.brats.Annotation.Icon.IconType
 
-class AnnotatedTextView @JvmOverloads constructor(
+class AnnotatedTextViewTest @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -26,10 +24,28 @@ class AnnotatedTextView @JvmOverloads constructor(
     private val annotations = mutableListOf<Annotation>()
 
     /**
+     * Add an arrow between lines connecting two words
+     */
+    fun addArrow(
+        fromWordStart: Int, fromWordEnd: Int,
+        toWordStart: Int, toWordEnd: Int
+    ) {
+        annotations.add(
+            Annotation.Arrow(
+                fromWordStart, fromWordEnd,
+                toWordStart, toWordEnd
+            )
+        )
+        invalidate()
+    }
+
+    /**
      * Add an icon below a specific word (in the space between lines)
      */
-    fun addAnnotation(wordStart: Int, wordEnd: Int) {
-        //annotations.add( )
+    fun addIcon(wordStart: Int, wordEnd: Int, type: IconType) {
+        annotations.add(
+            Annotation.Icon(wordStart, wordEnd, type)
+        )
         invalidate()
     }
 
@@ -68,15 +84,10 @@ class AnnotatedTextView @JvmOverloads constructor(
         drawLineSpace(canvas)
 
         // Draw all annotations
-        // for (annotation in annotations) {
-        //     annotation.draw(canvas, this)
-        // }
-        val edgeAnnotations = annotations.filter { it is EdgeAnnotation }.map { it as EdgeAnnotation}
-        val boxAnnotations = annotations.filter { it is BoxAnnotation }.map { it as BoxAnnotation}
-        val padWidth: Int = width
-        SemanticGraphPainter.paint(canvas, edgeAnnotations, boxAnnotations, padWidth, true)
+        for (annotation in annotations) {
+            annotation.draw(canvas, this)
+        }
     }
-
 
     private fun drawAnnotationSpace(canvas: Canvas) {
         val paintRect = Paint().apply {

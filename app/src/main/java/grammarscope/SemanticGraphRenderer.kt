@@ -1,12 +1,15 @@
 package grammarscope
 
 import android.graphics.Canvas
-import android.graphics.Paint
+import android.graphics.Paint.FontMetrics
 import android.graphics.Rect
 import android.graphics.RectF
 import android.text.Layout
 import android.widget.TextView
-import grammarscope.Utils.height
+import androidx.core.graphics.toColorInt
+import com.bbou.brats.Annotation
+import com.bbou.brats.Annotation.BoxAnnotation
+import com.bbou.brats.Annotation.EdgeAnnotation
 import grammarscope.allocator.Allocator
 import grammarscope.document.Document
 import grammarscope.document.Graph
@@ -25,17 +28,42 @@ import kotlin.math.max
 class SemanticGraphRenderer(
     textView: TextView,
     val renderAsCurves: Boolean
-) : ProtoRenderer() {
+) : IRenderer {
 
     /**
-     * Pad width
+     * Height
      */
-    private var padWidth = 0
+    var height: Int = textView.height - textView.paddingTop - textView.paddingBottom
+
+    /**
+     * Width
+     */
+    private var width = textView.width - textView.paddingRight - textView.paddingLeft
+
+    /**
+     * Top
+     */
+    private val padTopOffset: Int = textView.paddingTop
+
+    /**
+     * Annotation pad width
+     */
+    private var padWidth = width
+
+    /**
+     * Annotation pad width
+     */
+    private var padHeight = textView.lineSpacingExtra
 
     /**
      * Metrics for tag
      */
-    private val tagMetrics: Paint.FontMetrics = textView.paint.fontMetrics
+    private val tagMetrics: FontMetrics = textView.paint.fontMetrics
+
+    /**
+     * Metrics for tag
+     */
+    private val lineHeight: Float = textView.paint.fontMetrics.height()
 
     /**
      * Relation palette
@@ -45,51 +73,30 @@ class SemanticGraphRenderer(
     /**
      * Back color
      */
-    override val backColor: Int = DEFAULT_BACKCOLOR
+    val backColor: Int = DEFAULT_BACKCOLOR
 
     // DATA
 
     /**
      * Edges to draw
      */
-    private val edges: MutableCollection<Edge> = ArrayList<Edge>()
+    private val edges: MutableCollection<EdgeAnnotation> = ArrayList()
 
     /**
      * Boxes to draw
      */
-    private val boxes: MutableCollection<RectF> = ArrayList<RectF>()
-
-
-    // C O N S T R U C T
+    private val boxes: MutableCollection<BoxAnnotation> = ArrayList()
 
     // L A Y O U T
 
-    /* label inset topOffset ^ */
-    /* label inflate topOffset ^ ----------- */
-    /* font tagFontHeight tagHeight tagSpace | tag | */
-    /* label inflate bottom v ----------- */
-    /* label inset bottom v */
-    /* ---- pad topOffset = text bottom */
-    /* pad topOffset inset */
-    /* pad topOffset inset 2 */
-    /* tag 1 */
-    /* ---- first edge base */
-    /* ---- last edge base */
-    /* pad bottom inset 2 */
-    /* ---- pad height = pad bottom */
     override fun layout(
         document: Document,
         textComponent: TextView,
-        padWidth: Int,
-        padTopOffset: Int,
-        padHeight: Int,
-        lineHeight: Int
     ): Int {
         if (document.sentenceCount == 0) return 0
 
-        // store pad width
-        this.padWidth = padWidth
-
+        //
+        relationPalette  = { e -> 0xFFff0000.toColorInt() }
         // space height
         val tagFontHeight: Float = this.tagMetrics.height()
         val tagHeight: Float = tagFontHeight + 2 * LABEL_INFLATE
@@ -98,7 +105,7 @@ class SemanticGraphRenderer(
         // where edges start (slot 0)
         val firstEdgeBase: Float = PAD_TOP_INSET + EDGES_INSET_TOP + tagSpace // relative to pad topOffset
         if (firstEdgeBase > padHeight) return 0
-        val lastEdgeBase: Int = padHeight - PAD_BOTTOM_INSET - EDGES_INSET_BOTTOM // relative to pad
+        val lastEdgeBase: Float = padHeight - PAD_BOTTOM_INSET - EDGES_INSET_BOTTOM // relative to pad
 
         // topOffset
 
@@ -115,11 +122,11 @@ class SemanticGraphRenderer(
                 val rectangle: Rect = textComponent.modelToView(segment)
 
                 val boxL = rectangle.left
-                val boxT: Int = rectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
-                val boxH: Int = padHeight - PAD_TOP_INSET
+                val boxT: Float = rectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
+                val boxH: Float = padHeight - PAD_TOP_INSET
                 val boxW = rectangle.width()
-                val box = RectF(boxL.toFloat(), boxT.toFloat(), boxW.toFloat(), boxH.toFloat())
-                this.boxes.add(box)
+                val box = RectF(boxL.toFloat(), boxT, boxW.toFloat(), boxH)
+                this.boxes.add(BoxAnnotation(box))
             }
 
             // EDGES
@@ -163,11 +170,11 @@ class SemanticGraphRenderer(
                     val yEdge = leftRectangle.top + lineHeight + padTopOffset + firstEdgeBase + edgeYOffset
                     val xAnchor1 = (allocator.getLeftAnchor(edge) * X_SHIFT).toInt()
                     val xAnchor2 = (allocator.getRightAnchor(edge) * X_SHIFT).toInt()
-                    val yAnchor: Int = leftRectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
+                    val yAnchor: Float = leftRectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
                     val bottom = leftRectangle.top + lineHeight + padTopOffset + padHeight
 
                     val e: Edge = Edge.Companion.makeEdge(xEdge1, xEdge2, yEdge.toInt(), xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, true, true, bottom, isVisible)
-                    this.edges.add(e)
+                    this.edges.add(EdgeAnnotation(e))
 
                 } else {
                     // edge does not fit on line : make one edge per line
@@ -211,11 +218,11 @@ class SemanticGraphRenderer(
                             val yEdge = y + lineHeight + padTopOffset + firstEdgeBase + edgeYOffset
                             val xAnchor1 = (allocator.getLeftAnchor(edge) * X_SHIFT).toInt()
                             val xAnchor2 = (allocator.getRightAnchor(edge) * X_SHIFT).toInt()
-                            val yAnchor: Int = y + lineHeight + padTopOffset + PAD_TOP_INSET
+                            val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
                             val e: Edge = Edge.Companion.makeEdge(xEdge1, xEdge2, yEdge.toInt(), xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, isFirst, false, bottom, isVisible)
-                            this.edges.add(e)
+                            this.edges.add(EdgeAnnotation(e))
 
                             // move ahead cursor1
                             val rectangle2: Rect = textComponent.modelToView(segment.from)
@@ -237,18 +244,17 @@ class SemanticGraphRenderer(
                             val yEdge = y + lineHeight + padTopOffset + firstEdgeBase + edgeYOffset
                             val xAnchor1 = (allocator.getLeftAnchor(edge) * X_SHIFT).toInt()
                             val xAnchor2 = (allocator.getRightAnchor(edge) * X_SHIFT).toInt()
-                            val yAnchor: Int = y + lineHeight + padTopOffset + PAD_TOP_INSET
+                            val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
                             val e: Edge = Edge.Companion.makeEdge(xEdge1, xEdge2, yEdge.toInt(), xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, isFirst, true, bottom, isVisible)
-                            this.edges.add(e)
+                            this.edges.add(EdgeAnnotation(e))
                         }
                     }
                 }
             }
         }
-        this.height = padHeight
-        this.topOffset = padTopOffset
+
         return this.height
     }
 
@@ -293,8 +299,13 @@ class SemanticGraphRenderer(
         return Rect(left, top, right, bottom)
     }
 
-
     companion object {
+
+        @JvmStatic
+        fun FontMetrics.height(): Float {
+            return descent - ascent + leading // precise line height information, and be sure you're including the inter-line spacing
+            // return fontSpacing // a quick approximation of the line height.
+        }
 
         // COLORS
 

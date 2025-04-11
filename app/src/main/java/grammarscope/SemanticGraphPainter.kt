@@ -7,16 +7,18 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PathEffect
 import android.graphics.RectF
+import com.bbou.brats.Annotation.BoxAnnotation
+import com.bbou.brats.Annotation.EdgeAnnotation
 
 object SemanticGraphPainter {
 
     // P A I N T
 
-    fun paint(g: Canvas, edges: Collection<Edge>, boxes: Collection<RectF>, padWidth: Int, renderAsCurves: Boolean) {
+    fun paint(g: Canvas, edgeAnnotations: Collection<EdgeAnnotation>, boxAnnotations: Collection<BoxAnnotation>, padWidth: Int, renderAsCurves: Boolean) {
 
         // draw boxes
-        for (box in boxes) {
-            drawBox(g, box)
+        for (boxAnnotation in boxAnnotations) {
+            drawBox(g, boxAnnotation.box)
         }
 
         // draw edges
@@ -34,7 +36,8 @@ object SemanticGraphPainter {
             pathEffect = HANDLE_STROKE
         }
 
-        for (edge in edges) {
+        for (edgeAnnotation in edgeAnnotations) {
+            val edge = edgeAnnotation.edge
             if (edge.isVisible) {
                 edge.draw(g, renderAsCurves)
             } else {
@@ -59,9 +62,9 @@ object SemanticGraphPainter {
         }
 
         // draw labels
-        for (edge in edges) {
-            if (edge.isVisible) {
-                edge.drawLabel(g)
+        for (edgeAnnotation in edgeAnnotations) {
+            if (edgeAnnotation.edge.isVisible) {
+                edgeAnnotation.edge.drawLabel(g)
             }
         }
     }
@@ -134,7 +137,7 @@ object SemanticGraphPainter {
     // STROKES
     val SOLID: PathEffect? = null
     val DOTTED: PathEffect = DashPathEffect(floatArrayOf(1.0f, 1.0f), 0f)
-    val DASHED: PathEffect = DashPathEffect(floatArrayOf(2.0f), 0f)
+    val DASHED: PathEffect = DashPathEffect(floatArrayOf(5.0f, 5.0f), 0f)
 
     val EDGE_STROKE: PathEffect? = SOLID
     val OVERFLOW_STROKE_WIDTH = 1F

@@ -70,10 +70,4 @@ object Utils {
         val y2 = y0 + r
         drawOval(x1, y1, x2, y2, paint)
     }
-
-    @JvmStatic
-    fun Paint.FontMetrics.height(): Float {
-        return descent - ascent + leading // precise line height information, and be sure you're including the inter-line spacing
-        // return fontSpacing // a quick approximation of the line height.
-    }
 }

@@ -6,10 +6,9 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.RectF
 import android.graphics.Typeface
-import grammarscope.CurvePath
+import grammarscope.SemanticGraphRenderer.Companion.height
 import grammarscope.Utils.drawDot
 import grammarscope.Utils.drawTriangle
-import grammarscope.Utils.height
 import kotlin.math.atan2
 
 /**
@@ -401,14 +400,14 @@ class Edge
             baseY: Int,
             fromAnchorX: Int,
             toAnchorX: Int,
-            yAnchor: Int,
+            yAnchor: Float,
             height: Int,
             label: String?,
             color: Int,
             isBackwards: Boolean,
             isLeftTerminal: Boolean,
             isRightTerminal: Boolean,
-            bottom: Int,
+            bottom: Float,
             isVisible: Boolean
         ): Edge {
             // edge
@@ -441,7 +440,7 @@ class Edge
                 isBackwards,
                 isLeftTerminal,
                 isRightTerminal,
-                bottom,
+                bottom.toInt(),
                 isVisible
             )
 

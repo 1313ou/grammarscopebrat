@@ -67,9 +67,9 @@ data class Segment(
          * @param segments ordered segments
          * @return segment
          */
-        fun merge(segments: MutableList<out Segment?>?): Segment? {
-            if (segments == null || segments.isEmpty()) return null
-            return Segment(segments.get(0)!!.from, segments.get(segments.size - 1)!!.to)
+        fun merge(segments: List<Segment>): Segment {
+            if (segments.isEmpty()) throw IllegalArgumentException("segment list is empty")
+            return Segment(segments[0].from, segments[segments.size - 1].to)
         }
 
         /**
@@ -78,9 +78,9 @@ data class Segment(
          * @param segments ordered segments
          * @return segment
          */
-        fun merge(vararg segments: Segment?): Segment? {
-            if (segments.isEmpty()) return null
-            return Segment(segments[0]!!.from, segments[segments.size - 1]!!.to)
+        fun merge(vararg segments: Segment): Segment {
+            if (segments.isEmpty()) throw IllegalArgumentException("segment vararg is empty")
+            return Segment(segments[0].from, segments[segments.size - 1].to)
         }
     }
 }

@@ -42,10 +42,11 @@ interface GraphEdge : HasIndex, HasIndices {
  * @author Bernard Bou
  */
 interface Document {
+    val text: String
+
+    val sentenceCount: Int
 
     fun getGraph(sentenceIdx: Int): Graph<GraphNode, GraphEdge>
 
     fun split(segment1: Segment, segment2: Segment): MutableList<Segment>
-
-    val sentenceCount: Int
 }
