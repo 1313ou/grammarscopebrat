@@ -64,7 +64,7 @@ object SemanticGraphPainter {
         // draw labels
         for (edgeAnnotation in edgeAnnotations) {
             if (edgeAnnotation.edge.isVisible) {
-                // TODO edgeAnnotation.edge.drawLabel(g)
+                edgeAnnotation.edge.drawLabel(g)
             }
         }
     }

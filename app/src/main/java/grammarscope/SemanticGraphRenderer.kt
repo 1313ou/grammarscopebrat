@@ -1,13 +1,13 @@
 package grammarscope
 
 import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.Paint.FontMetrics
 import android.graphics.Rect
 import android.graphics.RectF
 import android.text.Layout
 import android.widget.TextView
 import androidx.core.graphics.toColorInt
-import com.bbou.brats.Annotation
 import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
 import grammarscope.Edge.Companion.makeEdge
@@ -59,7 +59,7 @@ class SemanticGraphRenderer(
     /**
      * Metrics for tag
      */
-    private val tagMetrics: FontMetrics = textView.paint.fontMetrics
+    private val tagMetrics: FontMetrics = Paint().apply { textSize = 30F }.fontMetrics
 
     /**
      * Metrics for tag
@@ -91,7 +91,7 @@ class SemanticGraphRenderer(
     // L A Y O U T
 
     private fun dumpLines() {
-        for(line in 0..textView.layout.lineCount) {
+        for (line in 0..textView.layout.lineCount) {
             var r = Rect()
             textView.layout.getLineBounds(line, r)
             println("$line $r")
@@ -107,7 +107,7 @@ class SemanticGraphRenderer(
         dumpLines()
 
         //
-        relationPalette  = { e -> "#FF0000".toColorInt() }
+        relationPalette = { e -> "#FF0000".toColorInt() }
 
         // space height
         val tagFontHeight: Float = this.tagMetrics.height()

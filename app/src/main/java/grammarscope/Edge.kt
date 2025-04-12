@@ -179,14 +179,15 @@ class Edge
         // tag background
         val paint = Paint().apply {
             style = Paint.Style.FILL
-            color = color
+            color = Color.YELLOW
         }
-        g.drawRect(tagRectangle.left, tagRectangle.top, tagRectangle.width(), tagRectangle.height(), paint)
+        g.drawRect(tagRectangle.left, tagRectangle.top, tagRectangle.right, tagRectangle.bottom, paint)
 
         // tag text
         val textPaint = Paint().apply {
             typeface = tagFont
-            color = labelColor
+            color = Color.BLUE // labelColor
+            textSize = 30F
         }
         if (isVertical) {
             val saveCount = g.save()
