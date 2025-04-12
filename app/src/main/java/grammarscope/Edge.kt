@@ -326,8 +326,8 @@ class Edge
         var arrowTipColor = Color.RED
         var arrowStartColor = Color.RED
 
-        val ARROW_TIP_WIDTH = 10F
-        val ARROW_TIP_HEIGHT = 10F
+        val ARROW_TIP_WIDTH = 15F
+        val ARROW_TIP_HEIGHT = 15F
         val ARROW_START_DIAMETER = 10F
         val EDGE_STROKE = 5F
 
