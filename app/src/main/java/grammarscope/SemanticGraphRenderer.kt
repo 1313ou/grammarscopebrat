@@ -98,6 +98,21 @@ class SemanticGraphRenderer(
         }
     }
 
+    /* label inset topOffset ^ */
+    /* label inflate topOffset ^ ----------- */
+    /* font tagFontHeight tagHeight tagSpace | tag | */
+    /* label inflate bottom v ----------- */
+    /* label inset bottom v */
+
+    /* ---- pad topOffset = text bottom */
+    /* pad topOffset inset */
+    /* pad topOffset inset 2 */
+    /* tag 1 */
+    /* ---- first edge base */
+    /* ---- last edge base */
+    /* pad bottom inset 2 */
+    /* ---- pad height = pad bottom */
+
     override fun layout(
         document: Document,
         textComponent: TextView,
@@ -133,16 +148,16 @@ class SemanticGraphRenderer(
                 val segment = node.segment
                 val rectangle: Rect = textComponent.modelToView(segment)
 
-                val boxL = rectangle.left
-                val boxT: Float = rectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
-                val boxH: Float = padHeight - PAD_TOP_INSET
-                val boxW = rectangle.width()
-                val box = RectF(boxL.toFloat(), boxT, boxW.toFloat(), boxH)
+                // val boxL = rectangle.left
+                // val boxT: Float = rectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
+                // val boxH: Float = padHeight - PAD_TOP_INSET
+                // val boxW = rectangle.width()
+                // val box = RectF(boxL.toFloat(), boxT, boxW.toFloat(), boxH)
+                val box = RectF(rectangle)
                 this.boxes.add(BoxAnnotation(box))
             }
 
             // EDGES
-
             // edge list
             val edges: Collection<GraphEdge> = graph.edges
 
@@ -175,8 +190,8 @@ class SemanticGraphRenderer(
                 // if it fits on one line
                 if (leftRectangle.top == rightRectangle.top) {
                     // compute edge
-                    val xEdge1 = textView.paddingLeft + leftRectangle.left + leftRectangle.width() / 2F
-                    val xEdge2 = textView.paddingLeft + rightRectangle.left + rightRectangle.width() / 2F
+                    val xEdge1 = leftRectangle.left + leftRectangle.width() / 2F
+                    val xEdge2 = rightRectangle.left + rightRectangle.width() / 2F
                     val yEdge = leftRectangle.top + lineHeight + padTopOffset + firstEdgeBase + edgeYOffset
                     val xAnchor1 = (allocator.getLeftAnchor(edge) * X_SHIFT).toInt()
                     val xAnchor2 = (allocator.getRightAnchor(edge) * X_SHIFT).toInt()
@@ -284,7 +299,7 @@ class SemanticGraphRenderer(
         val toRectangle: Rect = modelToView(segment.to)
         val left = fromRectangle.left.toInt()
         val top = fromRectangle.top.toInt()
-        val right = toRectangle.left.toInt()
+        val right = toRectangle.right.toInt()
         val bottom = max(fromRectangle.bottom, toRectangle.bottom)
         return Rect(left, top, right, bottom)
     }
@@ -293,20 +308,30 @@ class SemanticGraphRenderer(
         if (pos < 0 || pos > text.length) {
             return throw IllegalArgumentException("Invalid position: $pos")
         }
+        val metrics: FontMetrics = paint.fontMetrics
         val layout: Layout = layout
         val line: Int = layout.getLineForOffset(pos)
+        val baseline: Int = layout.getLineBaseline(line)
+        val top = baseline + metrics.ascent + paddingTop //layout.getLineTop(line)
+        val bottom = baseline + metrics.descent + paddingTop // layout.getLineBottom(line)
         val x: Float = layout.getPrimaryHorizontal(pos)
-        val top: Int = layout.getLineTop(line)
-        val bottom: Int = layout.getLineBottom(line)
         val width: Float = if (pos < text.length) {
             layout.getPrimaryHorizontal(pos + 1) - x
         } else {
-            // handle the end of the text.
-            if (pos > 0) layout.getPrimaryHorizontal(pos) - layout.getPrimaryHorizontal(pos - 1) else 0F
+            // Handle the end of the text.
+            if (text.isNotEmpty()) {
+                // Get the previous character position.
+                val previousPos = pos - 1
+                val previousX = layout.getPrimaryHorizontal(previousPos)
+                x - previousX
+            } else {
+                // Handle empty text.
+                0F
+            }
         }
-        val left = x.toInt()
-        val right = (x + width).toInt()
-        return Rect(left, top, right, bottom)
+        val left = x.toInt() + paddingLeft
+        val right = (left + width).toInt()
+        return Rect(left, top.toInt(), right, bottom.toInt())
     }
 
     companion object {

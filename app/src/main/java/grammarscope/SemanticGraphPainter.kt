@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PathEffect
 import android.graphics.RectF
+import androidx.core.graphics.toColorInt
 import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
 
@@ -18,7 +19,8 @@ object SemanticGraphPainter {
 
         // draw boxes
         for (boxAnnotation in boxAnnotations) {
-            drawBox(g, boxAnnotation.box)
+            // drawBox(g, boxAnnotation.box)
+            g.drawRect(boxAnnotation.box, Paint().apply{ color = "#40ff0000".toColorInt()})
         }
 
         // draw edges

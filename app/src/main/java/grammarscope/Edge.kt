@@ -331,8 +331,8 @@ class Edge
         val ARROW_START_DIAMETER = 10F
         val EDGE_STROKE = 5F
 
-        val LABEL_BOTTOM_INSET = 0F
-        val LABEL_INFLATE = 0F
+        val LABEL_BOTTOM_INSET = 10F
+        val LABEL_INFLATE = 1F
 
         const val DEFAULT_EDGE_COLOR: Int = Color.DKGRAY
         const val DEFAULT_LABEL_COLOR: Int = Color.DKGRAY

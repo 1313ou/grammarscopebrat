@@ -44,8 +44,8 @@ class SampleDocument : Document {
     val carW = Word("car", Segment(19, 21))
     val thatW = Word("that", Segment(23, 26))
     val sheW = Word("she", Segment(28, 30))
-    val drivesW = Word("drives", Segment(32, 36))
-    val stopW = Word(".", Segment(39, 38))
+    val drivesW = Word("drives", Segment(32, 37))
+    val stopW = Word(".", Segment(39, 39))
     val words = listOf(/*rootW,*/ bobW, gaveW, aliceW, theW, carW, thatW, sheW, drivesW, stopW)
 
     override val sentenceCount: Int

@@ -60,7 +60,8 @@ class AnnotatedTextView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        //drawAnnotationSpace(canvas)
+        drawAnnotationSpace(canvas)
+        drawWordSpace(canvas)
 
         // Draw text
         super.onDraw(canvas)
@@ -71,16 +72,35 @@ class AnnotatedTextView @JvmOverloads constructor(
         // for (annotation in annotations) {
         //     annotation.draw(canvas, this)
         // }
-        val edgeAnnotations = annotations.filter { it is EdgeAnnotation }.map { it as EdgeAnnotation}
-        val boxAnnotations = annotations.filter { it is BoxAnnotation }.map { it as BoxAnnotation}
+
+        val edgeAnnotations = annotations.filter { it is EdgeAnnotation }.map { it as EdgeAnnotation }
+        val boxAnnotations = annotations.filter { it is BoxAnnotation }.map { it as BoxAnnotation }
         val padWidth: Int = width
         SemanticGraphPainter.paint(canvas, edgeAnnotations, boxAnnotations, padWidth, false)
     }
 
+    private fun drawWordSpace(canvas: Canvas) {
+        val paintRect = Paint().apply {
+            color = "#FFFFC0".toColorInt()
+            strokeWidth = 2f
+            style = Paint.Style.FILL
+        }
+        val lineCount = layout.lineCount
+        for (line in 0 until lineCount) {
+            val lineStart: Int = layout.getLineStart(line)
+            val lineEnd: Int = layout.getLineEnd(line)
+            val lineText: CharSequence = text.subSequence(lineStart, lineEnd)
+            val words: List<String> = lineText.split("\\s+".toRegex())
+            for (word in words) {
+                println("- $word")
+
+            }
+        }
+    }
 
     private fun drawAnnotationSpace(canvas: Canvas) {
         val paintRect = Paint().apply {
-            color = "#FFFFC0".toColorInt()
+            color = "#FFffffb0".toColorInt()
             strokeWidth = 2f
             style = Paint.Style.FILL
         }
