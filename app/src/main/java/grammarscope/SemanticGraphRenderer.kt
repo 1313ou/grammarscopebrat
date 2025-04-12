@@ -27,7 +27,7 @@ import kotlin.math.max
  * @author Bernard Bou
  */
 class SemanticGraphRenderer(
-    textView: TextView,
+    val textView: TextView,
     val renderAsCurves: Boolean
 ) : IRenderer {
 
@@ -44,7 +44,7 @@ class SemanticGraphRenderer(
     /**
      * Top
      */
-    private val padTopOffset: Int = textView.paddingTop
+    private val padTopOffset: Int = 5
 
     /**
      * Annotation pad width
@@ -90,14 +90,25 @@ class SemanticGraphRenderer(
 
     // L A Y O U T
 
+    private fun dumpLines() {
+        for(line in 0..textView.layout.lineCount) {
+            var r = Rect()
+            textView.layout.getLineBounds(line, r)
+            println("$line $r")
+        }
+    }
+
     override fun layout(
         document: Document,
         textComponent: TextView,
     ): Int {
         if (document.sentenceCount == 0) return 0
 
+        dumpLines()
+
         //
-        relationPalette  = { e -> 0xFFff0000.toColorInt() }
+        relationPalette  = { e -> "#FF0000".toColorInt() }
+
         // space height
         val tagFontHeight: Float = this.tagMetrics.height()
         val tagHeight: Float = tagFontHeight + 2 * LABEL_INFLATE
@@ -145,12 +156,10 @@ class SemanticGraphRenderer(
                 // segment
                 val fromWord = edge.source.segment
                 val toWord = edge.target.segment
-                val isBackwards = fromWord.from > toWord.from
 
+                val isBackwards = fromWord.from > toWord.from
                 val leftSegment = if (isBackwards) toWord else fromWord
                 val rightSegment = if (isBackwards) fromWord else toWord
-
-                // System.out.println("edge " + edge + " @" + leftSegment + "-" + rightSegment);
 
                 // location
                 val leftRectangle: Rect = textComponent.modelToView(leftSegment)
@@ -166,15 +175,15 @@ class SemanticGraphRenderer(
                 // if it fits on one line
                 if (leftRectangle.top == rightRectangle.top) {
                     // compute edge
-                    val xEdge1 = leftRectangle.left + leftRectangle.width() / 2
-                    val xEdge2 = rightRectangle.left + rightRectangle.width() / 2
+                    val xEdge1 = textView.paddingLeft + leftRectangle.left + leftRectangle.width() / 2F
+                    val xEdge2 = textView.paddingLeft + rightRectangle.left + rightRectangle.width() / 2F
                     val yEdge = leftRectangle.top + lineHeight + padTopOffset + firstEdgeBase + edgeYOffset
                     val xAnchor1 = (allocator.getLeftAnchor(edge) * X_SHIFT).toInt()
                     val xAnchor2 = (allocator.getRightAnchor(edge) * X_SHIFT).toInt()
                     val yAnchor: Float = leftRectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
                     val bottom = leftRectangle.top + lineHeight + padTopOffset + padHeight
 
-                    val e: Edge = makeEdge(xEdge1, xEdge2, yEdge.toInt(), xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, true, true, bottom, isVisible)
+                    val e: Edge = makeEdge(xEdge1, xEdge2, yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, true, true, bottom, isVisible)
                     this.edges.add(EdgeAnnotation(e))
 
                 } else {
@@ -215,14 +224,14 @@ class SemanticGraphRenderer(
                         if (rectangle.top != y) {
                             // line break before this segment
                             val xEdge1 = xLeft + xLeftOfs - (if (isFirst) 0 else X_MARGIN)
-                            val xEdge2: Int = xRight + X_MARGIN
+                            val xEdge2 = xRight + X_MARGIN
                             val yEdge = y + lineHeight + padTopOffset + firstEdgeBase + edgeYOffset
                             val xAnchor1 = (allocator.getLeftAnchor(edge) * X_SHIFT).toInt()
                             val xAnchor2 = (allocator.getRightAnchor(edge) * X_SHIFT).toInt()
                             val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
-                            val e: Edge = Edge.Companion.makeEdge(xEdge1, xEdge2, yEdge.toInt(), xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, isFirst, false, bottom, isVisible)
+                            val e: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, isFirst, false, bottom, isVisible)
                             this.edges.add(EdgeAnnotation(e))
 
                             // move ahead cursor1
@@ -248,12 +257,13 @@ class SemanticGraphRenderer(
                             val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
-                            val e: Edge = Edge.Companion.makeEdge(xEdge1, xEdge2, yEdge.toInt(), xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, isFirst, true, bottom, isVisible)
+                            val e: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, isFirst, true, bottom, isVisible)
                             this.edges.add(EdgeAnnotation(e))
                         }
                     }
                 }
             }
+            break
         }
         return this.height
     }
@@ -272,11 +282,11 @@ class SemanticGraphRenderer(
 
         val fromRectangle: Rect = modelToView(segment.from)
         val toRectangle: Rect = modelToView(segment.to)
-        val x = fromRectangle.left.toInt()
-        val y = fromRectangle.top.toInt()
-        val w = toRectangle.left.toInt() - x
-        val h = max(fromRectangle.height(), toRectangle.height()).toInt()
-        return Rect(x, y, w, h)
+        val left = fromRectangle.left.toInt()
+        val top = fromRectangle.top.toInt()
+        val right = toRectangle.left.toInt()
+        val bottom = max(fromRectangle.bottom, toRectangle.bottom)
+        return Rect(left, top, right, bottom)
     }
 
     private fun TextView.modelToView(pos: Int): Rect {

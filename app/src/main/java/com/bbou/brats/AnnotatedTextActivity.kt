@@ -32,10 +32,10 @@ class AnnotatedTextActivity : AppCompatActivity() {
         textView.text = text
 
         // Highlight root
-        val rootPos = findWordPosition(text, "gave")
-        if (rootPos != null) {
-            textView.highlightWord(rootPos.first, rootPos.second, "#FFEB3B".toColorInt())
-        }
+        //val rootPos = findWordPosition(text, "gave")
+        //if (rootPos != null) {
+        //    textView.highlightWord(rootPos.first, rootPos.second, "#FFEB3B".toColorInt())
+        //}
 
         // renderer
         renderer = SemanticGraphRenderer(textView, true)

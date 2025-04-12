@@ -60,12 +60,12 @@ class AnnotatedTextView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        drawAnnotationSpace(canvas)
+        //drawAnnotationSpace(canvas)
 
         // Draw text
         super.onDraw(canvas)
 
-        drawLineSpace(canvas)
+        //drawLineSpace(canvas)
 
         // Draw all annotations
         // for (annotation in annotations) {
@@ -74,7 +74,7 @@ class AnnotatedTextView @JvmOverloads constructor(
         val edgeAnnotations = annotations.filter { it is EdgeAnnotation }.map { it as EdgeAnnotation}
         val boxAnnotations = annotations.filter { it is BoxAnnotation }.map { it as BoxAnnotation}
         val padWidth: Int = width
-        SemanticGraphPainter.paint(canvas, edgeAnnotations, boxAnnotations, padWidth, true)
+        SemanticGraphPainter.paint(canvas, edgeAnnotations, boxAnnotations, padWidth, false)
     }
 
 

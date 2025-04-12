@@ -54,8 +54,10 @@ sealed class Annotation {
         }
 
         override fun draw(canvas: Canvas, textView: AnnotatedTextView) {
+        }
 
-
+        override fun toString(): String {
+            return "EdgeAnnotation ${edge.tag} y=${edge.yBase} h=${edge.height} x1=${edge.x1} x2=${edge.x2}"
         }
     }
 }
