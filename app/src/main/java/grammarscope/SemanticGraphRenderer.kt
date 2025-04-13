@@ -98,20 +98,23 @@ class SemanticGraphRenderer(
         }
     }
 
-    /* label inset topOffset ^ */
-    /* label inflate topOffset ^ ----------- */
-    /* font tagFontHeight tagHeight tagSpace | tag | */
-    /* label inflate bottom v ----------- */
-    /* label inset bottom v */
+    /*
+    topOffset
+    label top inset
+    label top inflate
+    tag height
+    label bottom inflate
+    label bottom
 
-    /* ---- pad topOffset = text bottom */
-    /* pad topOffset inset */
-    /* pad topOffset inset 2 */
-    /* tag 1 */
-    /* ---- first edge base */
-    /* ---- last edge base */
-    /* pad bottom inset 2 */
-    /* ---- pad height = pad bottom */
+    pad top = text bottom
+    pad top inset
+    edge tag
+    first edge base
+    ...
+    last edge base
+    pad bottom inset
+    pad bottom = pad height
+    */
 
     override fun layout(
         document: Document,
@@ -119,7 +122,7 @@ class SemanticGraphRenderer(
     ): Int {
         if (document.sentenceCount == 0) return 0
 
-        dumpLines()
+        // dumpLines()
 
         //
         relationPalette = { e -> "#FF0000".toColorInt() }
@@ -198,7 +201,7 @@ class SemanticGraphRenderer(
                     val yAnchor: Float = leftRectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
                     val bottom = leftRectangle.top + lineHeight + padTopOffset + padHeight
 
-                    val e: Edge = makeEdge(xEdge1, xEdge2, yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, true, true, bottom, isVisible)
+                    val e: Edge = makeEdge(xEdge1, xEdge2, yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), bottom, label, isBackwards, isLeftTerminal = true, isRightTerminal = true, isVisible, color)
                     this.edges.add(EdgeAnnotation(e))
 
                 } else {
@@ -246,7 +249,7 @@ class SemanticGraphRenderer(
                             val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
-                            val e: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, isFirst, false, bottom, isVisible)
+                            val e: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = false, isVisible, color)
                             this.edges.add(EdgeAnnotation(e))
 
                             // move ahead cursor1
@@ -272,7 +275,7 @@ class SemanticGraphRenderer(
                             val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
-                            val e: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), label, color, isBackwards, isFirst, true, bottom, isVisible)
+                            val e: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = true, isVisible, color)
                             this.edges.add(EdgeAnnotation(e))
                         }
                     }
@@ -284,7 +287,8 @@ class SemanticGraphRenderer(
     }
 
     override fun paint(canvas: Canvas) {
-        SemanticGraphPainter.paint(canvas, this.edges, this.boxes, this.padWidth, this.renderAsCurves)
+        SemanticGraphPainter.paintBoxes(canvas, this.boxes)
+        SemanticGraphPainter.paintEdges(canvas, this.edges, this.padWidth, this.renderAsCurves)
     }
 
     /**

@@ -162,9 +162,6 @@ class AnnotatedTextViewTest @JvmOverloads constructor(
             val lineAscent = layout.getLineAscent(line).toFloat()
             val lineDescent = layout.getLineDescent(line).toFloat()
 
-            // Print the positions.
-            println("Line $line: Top = $top, Bottom = $bottom, Base = $base, Height = $height, Ascent= $ascent/$lineAscent, Descent = $descent/$lineDescent, Leading = $leading")
-
             // Paint lines.
             val x1 = 0f
             val x2 = width.toFloat() / 2f

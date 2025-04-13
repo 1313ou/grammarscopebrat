@@ -76,25 +76,18 @@ class AnnotatedTextView @JvmOverloads constructor(
         val edgeAnnotations = annotations.filter { it is EdgeAnnotation }.map { it as EdgeAnnotation }
         val boxAnnotations = annotations.filter { it is BoxAnnotation }.map { it as BoxAnnotation }
         val padWidth: Int = width
-        SemanticGraphPainter.paint(canvas, edgeAnnotations, boxAnnotations, padWidth, false)
+
+        SemanticGraphPainter.paintBoxes(canvas, boxAnnotations)
+        SemanticGraphPainter.paintEdges(canvas, edgeAnnotations, padWidth, renderAsCurves = false)
     }
 
     private fun drawWordSpace(canvas: Canvas) {
-        val paintRect = Paint().apply {
-            color = "#FFFFC0".toColorInt()
-            strokeWidth = 2f
-            style = Paint.Style.FILL
-        }
         val lineCount = layout.lineCount
         for (line in 0 until lineCount) {
             val lineStart: Int = layout.getLineStart(line)
             val lineEnd: Int = layout.getLineEnd(line)
             val lineText: CharSequence = text.subSequence(lineStart, lineEnd)
-            val words: List<String> = lineText.split("\\s+".toRegex())
-            for (word in words) {
-                println("- $word")
-
-            }
+            println("[$line]- $lineText")
         }
     }
 

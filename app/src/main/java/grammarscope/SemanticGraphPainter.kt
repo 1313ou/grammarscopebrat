@@ -15,16 +15,16 @@ object SemanticGraphPainter {
 
     // P A I N T
 
-    fun paint(g: Canvas, edgeAnnotations: Collection<EdgeAnnotation>, boxAnnotations: Collection<BoxAnnotation>, padWidth: Int, renderAsCurves: Boolean) {
-
-        // draw boxes
+    fun paintBoxes(g: Canvas, boxAnnotations: Collection<BoxAnnotation>) {
         for (boxAnnotation in boxAnnotations) {
             // drawBox(g, boxAnnotation.box)
-            g.drawRect(boxAnnotation.box, Paint().apply{ color = "#40ff0000".toColorInt()})
+            g.drawRect(boxAnnotation.box, Paint().apply { color = "#40ff0000".toColorInt() })
         }
+    }
 
-        // draw edges
-        val overflowPaint = Paint().apply {
+    fun paintEdges(g: Canvas, edgeAnnotations: Collection<EdgeAnnotation>, padWidth: Int, renderAsCurves: Boolean) {
+
+         val overflowPaint = Paint().apply {
             color = DEFAULT_OVERFLOW_COLOR
             style = Paint.Style.STROKE
             strokeWidth = OVERFLOW_STROKE_WIDTH
@@ -40,6 +40,8 @@ object SemanticGraphPainter {
 
         for (edgeAnnotation in edgeAnnotations) {
             val edge = edgeAnnotation.edge
+            println(edge)
+
             if (edge.isVisible) {
                 edge.draw(g, renderAsCurves)
             } else {

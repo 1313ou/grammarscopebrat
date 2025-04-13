@@ -14,8 +14,24 @@ import kotlin.math.atan2
 
 /**
  * Edge as used by renderer
+ *
+ * @property x1              x1
+ * @property x2              x2
+ * @property yBase           y
+ * @property x1Anchor        anchor x1
+ * @property x2Anchor        anchor x2
+ * @property yAnchor         anchor y
+ * @property height          height
+ * @property tag             edge label/tag
+ * @property isVertical      label/tag is vertical
+ * @property color           color
+ * @property isBackwards     direction
+ * @property isLeftTerminal  is left terminal
+ * @property isRightTerminal is right terminal
+ * @property isVisible       is visible
+ * @property bottom          pad bottom
  */
-class Edge
+data class Edge
     (
     /**
      * Edge x left coordinate
@@ -46,6 +62,10 @@ class Edge
      */
     val height: Float,
     /**
+     * Bottom past which this edge is not visible
+     */
+    val bottom: Int,
+    /**
      * Edge tag (relation)
      */
     val tag: String,
@@ -53,10 +73,6 @@ class Edge
      * Whether this label is vertical
      */
     val isVertical: Boolean,
-    /**
-     * Edge color
-     */
-    val color: Int,
     /**
      * Whether this edge is continued on next line
      */
@@ -70,13 +86,13 @@ class Edge
      */
     val isRightTerminal: Boolean,
     /**
-     * Bottom past which this edge is not visible
-     */
-    val bottom: Int,
-    /**
      * Whether this edge is visible
      */
-    val isVisible: Boolean
+    val isVisible: Boolean,
+    /**
+     * Edge color
+     */
+    val color: Int,
 ) {
 
     /**
@@ -94,25 +110,6 @@ class Edge
      */
     val tagWidth: Int
 
-    /**
-     * Constructor
-     *
-     * @param x1              x1
-     * @param x2              x2
-     * @param yBase           y
-     * @param x1Anchor        anchor x1
-     * @param x2Anchor        anchor x2
-     * @param yAnchor         anchor y
-     * @param height          height
-     * @param tag             edge label/tag
-     * @param isVertical      label/tag is vertical
-     * @param color           color
-     * @param isBackwards     direction
-     * @param isLeftTerminal  is left terminal
-     * @param isRightTerminal is right terminal
-     * @param bottom          pad bottom
-     * @param isVisible       is visible
-     */
     init {
         if (isVertical) {
 
@@ -313,7 +310,7 @@ class Edge
     }
 
     override fun toString(): String {
-        return "$tag y=$yBase h=$height x1=$x1 x2=$x2 ${if (isBackwards) "backward" else "forward"} ${if (isLeftTerminal) "|-" else "--"}${if (isRightTerminal) "-|" else "--"}"
+        return "'$tag' _${yBase.toInt()} ↕${height.toInt()} ${x1.toInt()}${if (isLeftTerminal) "|" else ""}${if (isBackwards) "🡄" else "🡆"}${if (isRightTerminal) "|" else ""}${x2.toInt()}" //← → ⇽ ⇾ ⏐ ▴ ▾ ▶ ◀ ➔ ➽ ⟵ ⟶ ⥼ ⥽ ⬅ ⮕ 🡄🡅 🡆🡇🠈🠊🠉🠋 🢀🢂🡪🡲🡺🢀↕
     }
 
     companion object {
@@ -321,24 +318,23 @@ class Edge
 
         var tagMetrics: FontMetrics = FontMetrics()
 
-        var labelColor = Color.RED
-        var edgeColor = Color.RED
-        var arrowTipColor = Color.RED
-        var arrowStartColor = Color.RED
+        const val ARROW_TIP_WIDTH = 15F
+        const val ARROW_TIP_HEIGHT = 15F
+        const val ARROW_START_DIAMETER = 10F
+        const val EDGE_STROKE = 5F
 
-        val ARROW_TIP_WIDTH = 15F
-        val ARROW_TIP_HEIGHT = 15F
-        val ARROW_START_DIAMETER = 10F
-        val EDGE_STROKE = 5F
-
-        val LABEL_BOTTOM_INSET = 10F
-        val LABEL_INFLATE = 1F
+        const val LABEL_BOTTOM_INSET = 10F
+        const val LABEL_INFLATE = 1F
 
         const val DEFAULT_EDGE_COLOR: Int = Color.DKGRAY
         const val DEFAULT_LABEL_COLOR: Int = Color.DKGRAY
         const val DEFAULT_ARROW_TIP_COLOR: Int = Color.DKGRAY
         const val DEFAULT_ARROW_START_COLOR: Int = Color.GRAY
 
+        var labelColor = Color.RED
+        var edgeColor = Color.RED
+        var arrowTipColor = Color.RED
+        var arrowStartColor = Color.RED
 
         /**
          * Set label color
@@ -387,13 +383,13 @@ class Edge
          * @param toAnchorX       x anchor to
          * @param yAnchor         y anchor
          * @param height          height
+         * @param bottom          pad bottom
          * @param label           label
-         * @param color           color
          * @param isBackwards     whether edge is backwards
          * @param isLeftTerminal  whether this edge left-terminates
          * @param isRightTerminal whether this edge right-terminates
-         * @param bottom          pad bottom
          * @param isVisible       whether this edge is visible
+         * @param color           color
          */
         fun makeEdge(
             fromX: Float,
@@ -403,13 +399,13 @@ class Edge
             toAnchorX: Int,
             yAnchor: Float,
             height: Int,
+            bottom: Float,
             label: String?,
-            color: Int,
             isBackwards: Boolean,
             isLeftTerminal: Boolean,
             isRightTerminal: Boolean,
-            bottom: Float,
-            isVisible: Boolean
+            isVisible: Boolean,
+            color: Int,
         ): Edge {
             // edge
             val width = toX + toAnchorX - (fromX + fromAnchorX)
@@ -426,15 +422,15 @@ class Edge
                 toAnchorX.toFloat(),
                 yAnchor.toFloat(),
                 height.toFloat(),
+                bottom.toInt(),
                 edgeLabel,
                 isVertical = isVertical,
-                color,
                 isBackwards = isBackwards,
                 isLeftTerminal = isLeftTerminal,
                 isRightTerminal = isRightTerminal,
-                bottom.toInt(),
-                isVisible = isVisible
-            )
+                isVisible = isVisible,
+                color,
+             )
 
             return edge
         }
