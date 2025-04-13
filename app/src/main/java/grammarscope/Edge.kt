@@ -188,16 +188,16 @@ data class Edge
         g2.drawPath(shape, paint)
 
         // control
-        // final int cox1 = (int) shape.getXCornerRight();
-        // final int cox2 = (int) shape.getXCornerLeft();
+        // val cox1 = (int) shape.getXCornerRight()
+        // val cox2 = (int) shape.getXCornerLeft()
         val ctx1 = shape.xControlRight.toInt()
         val ctx2 = shape.xControlLeft.toInt()
         val cty = shape.yBase.toInt()
 
         // arrow tip at corner
         if (isRightTerminal && !isBackwards) {
-            // int xc = (int) shape.getXCornerRight();
-            // int yc = yText;
+            // val xc = (int) shape.getXCornerRight()
+            // val yc =
             // drawTriangle(g2, ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, false)
             // double theta = toDegrees(atan2((double)y - yc, (double)x - xc)) // corner
             val theta = toDegrees(atan2(yTo.toDouble() - cty, xTo.toDouble() - ctx1))
@@ -207,10 +207,10 @@ data class Edge
             g2.drawTriangle(xTo, yTo, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = false, rotation = theta.toFloat(), paint)
 
         } else if (isLeftTerminal && isBackwards) {
-            // int xc = (int) shape.getXCornerLeft();
-            // int yc = yText;
-            // Utils.drawTriangle(g2, ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, true)
-            // double theta = toDegrees(atan2((double)yc - y, (double)xc - x)) // corner
+            // val xc = (int) shape.getXCornerLeft()
+            // val yc = yText
+            // drawTriangle(g2, ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, true)
+            // val theta = toDegrees(atan2((double)yc - y, (double)xc - x)) // corner
             val theta = toDegrees(atan2(cty.toDouble() - yFrom, ctx2.toDouble() - xFrom))
             val paint = Paint().apply {
                 color = arrowTipColor
@@ -218,10 +218,10 @@ data class Edge
             g2.drawTriangle(xFrom, yFrom, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = true, rotation = theta.toFloat(), paint)
         }
 
-        // Utils.drawDot(g2, Color.RED, cox1, cty, 1)
-        // Utils.drawDot(g2, Color.RED, cox2, cty, 1)
-        // Utils.drawDiamond(g2, Color.BLUE, ctx1, cty, 1)
-        // Utils.drawDiamond(g2, Color.BLUE, ctx2, cty, 1)
+        // drawDot(g2, Color.RED, cox1, cty, 1)
+        // drawDot(g2, Color.RED, cox2, cty, 1)
+        // drawDiamond(g2, Color.BLUE, ctx1, cty, 1)
+        // drawDiamond(g2, Color.BLUE, ctx2, cty, 1)
     }
 
     /**
@@ -493,6 +493,6 @@ data class Edge
             } else {
                 label.substring(0, min(n, label.length))
             }
-         }
+        }
     }
 }
