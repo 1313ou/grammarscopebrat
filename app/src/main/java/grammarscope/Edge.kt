@@ -150,23 +150,23 @@ data class Edge
     /**
      * Draw edge
      *
-     * @param g2      graphics context
+     * @param g      graphics context
      * @param asCurve whether to draw edge as curve (or straight arrow)
      */
-    fun draw(g2: Canvas, asCurve: Boolean) {
+    fun draw(g: Canvas, asCurve: Boolean) {
         if (asCurve) {
-            drawCurvePath(g2)
+            drawCurvePath(g)
         } else {
-            drawStraightArrow(g2)
+            drawStraightArrow(g)
         }
     }
 
     /**
      * Draw edge as curve
      *
-     * @param g2 graphics context
+     * @param g graphics context
      */
-    private fun drawCurvePath(g2: Canvas) {
+    private fun drawCurvePath(g: Canvas) {
         // edge
         val paint = Paint().apply {
             color = edgeColor
@@ -185,7 +185,7 @@ data class Edge
 
         // curve
         val shape = CurvePath(xFrom, xTo, xTextFrom, xTextTo, yFrom, yTo, yText, flatLeft, flatRight)
-        g2.drawPath(shape, paint)
+        g.drawPath(shape, paint)
 
         // control
         // val cox1 = (int) shape.getXCornerRight()
@@ -197,46 +197,46 @@ data class Edge
         // arrow tip at corner
         if (isRightTerminal && !isBackwards) {
             // val xc = (int) shape.getXCornerRight()
-            // val yc =
-            // drawTriangle(g2, ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, false)
+            // val yc = yText
+            // g.drawTriangle(ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, false)
             // double theta = toDegrees(atan2((double)y - yc, (double)x - xc)) // corner
             val theta = toDegrees(atan2(yTo.toDouble() - cty, xTo.toDouble() - ctx1))
             val paint = Paint().apply {
                 color = arrowTipColor
             }
-            g2.drawTriangle(xTo, yTo, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = false, rotation = theta.toFloat(), paint)
+            g.drawTriangle(xTo, yTo, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = false, rotation = theta.toFloat(), paint)
 
         } else if (isLeftTerminal && isBackwards) {
             // val xc = (int) shape.getXCornerLeft()
             // val yc = yText
-            // drawTriangle(g2, ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, true)
+            // g.drawTriangle(ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, true)
             // val theta = toDegrees(atan2((double)yc - y, (double)xc - x)) // corner
             val theta = toDegrees(atan2(cty.toDouble() - yFrom, ctx2.toDouble() - xFrom))
             val paint = Paint().apply {
                 color = arrowTipColor
             }
-            g2.drawTriangle(xFrom, yFrom, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = true, rotation = theta.toFloat(), paint)
+            g.drawTriangle(xFrom, yFrom, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = true, rotation = theta.toFloat(), paint)
         }
 
-        // drawDot(g2, Color.RED, cox1, cty, 1)
-        // drawDot(g2, Color.RED, cox2, cty, 1)
-        // drawDiamond(g2, Color.BLUE, ctx1, cty, 1)
-        // drawDiamond(g2, Color.BLUE, ctx2, cty, 1)
+        // g.drawDot(Color.RED, cox1, cty, 1)
+        // g.drawDot(Color.RED, cox2, cty, 1)
+        // g.drawDiamond(Color.BLUE, ctx1, cty, 1)
+        // g.drawDiamond(Color.BLUE, ctx2, cty, 1)
     }
 
     /**
      * Draw edge as straight arrow
      *
-     * @param g2 graphics context
+     * @param g graphics context
      */
-    private fun drawStraightArrow(g2: Canvas) {
+    private fun drawStraightArrow(g: Canvas) {
         // edge
         val paint = Paint().apply {
             color = edgeColor
             style = Paint.Style.STROKE
             strokeWidth = 2F //EDGE_STROKE
         }
-        g2.drawLine(x1, yBase, x2 - 1F, yBase, paint)
+        g.drawLine(x1, yBase, x2 - 1F, yBase, paint)
 
         // arrow tip
         val drawArrowEnd = if (isBackwards) isLeftTerminal else isRightTerminal
@@ -245,7 +245,7 @@ data class Edge
             val paint = Paint().apply {
                 color = arrowTipColor
             }
-            g2.drawTriangle(xTip, yBase, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, isBackwards, paint)
+            g.drawTriangle(xTip, yBase, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, isBackwards, paint)
         }
 
         // arrow start
@@ -255,7 +255,7 @@ data class Edge
             val paint = Paint().apply {
                 color = arrowStartColor
             }
-            g2.drawDot(xTip, yBase, ARROW_START_DIAMETER, paint)
+            g.drawDot(xTip, yBase, ARROW_START_DIAMETER, paint)
         }
     }
 

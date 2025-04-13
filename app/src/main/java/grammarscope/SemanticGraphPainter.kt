@@ -103,8 +103,8 @@ object SemanticGraphPainter {
         val shape: Path = CurlyBracePath(boxL, boxR, boxM, boxT, false)
         g.drawPath(shape, spanPaint)
 
-        // g2.drawLine(boxL, boxT, boxR, boxT) // pad topOffset
-        // g2.drawLine(boxL, boxB, boxR, boxB) // pad bottom
+        // g.drawLine(boxL, boxT, boxR, boxT) // pad topOffset
+        // g.drawLine(boxL, boxB, boxR, boxB) // pad bottom
     }
 
     var spanColor: Int = 0
