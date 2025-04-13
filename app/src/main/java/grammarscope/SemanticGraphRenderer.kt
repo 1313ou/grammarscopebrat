@@ -368,6 +368,6 @@ class SemanticGraphRenderer(
 
         private const val X_MARGIN = 40
 
-        private const val X_SHIFT = 3
+        private const val X_SHIFT = 7
     }
 }

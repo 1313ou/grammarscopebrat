@@ -78,7 +78,7 @@ class AnnotatedTextView @JvmOverloads constructor(
         val padWidth: Int = width
 
         SemanticGraphPainter.paintBoxes(canvas, boxAnnotations)
-        SemanticGraphPainter.paintEdges(canvas, edgeAnnotations, padWidth, renderAsCurves = false)
+        SemanticGraphPainter.paintEdges(canvas, edgeAnnotations, padWidth, renderAsCurves = true)
     }
 
     private fun drawWordSpace(canvas: Canvas) {

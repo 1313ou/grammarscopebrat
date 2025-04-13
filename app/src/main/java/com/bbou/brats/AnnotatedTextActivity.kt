@@ -2,7 +2,6 @@ package com.bbou.brats
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.toColorInt
 import grammarscope.SemanticGraphRenderer
 import grammarscope.document.SampleDocument
 
