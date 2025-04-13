@@ -57,9 +57,9 @@ class SemanticGraphRenderer(
     private var padHeight = textView.lineSpacingExtra
 
     /**
-     * Metrics for tag
+     * Paint for tag
      */
-    private val tagMetrics: FontMetrics = Paint().apply { textSize = 30F }.fontMetrics
+    private val tagPaint: Paint = Paint().apply { textSize = 30F }
 
     /**
      * Metrics for tag
@@ -128,7 +128,7 @@ class SemanticGraphRenderer(
         relationPalette = { e -> "#FF0000".toColorInt() }
 
         // space height
-        val tagFontHeight: Float = this.tagMetrics.height()
+        val tagFontHeight: Float = tagPaint.fontMetrics.height()
         val tagHeight: Float = tagFontHeight + 2 * LABEL_INFLATE
         val tagSpace: Float = tagHeight + LABEL_TOP_INSET + LABEL_BOTTOM_INSET
 
@@ -162,18 +162,18 @@ class SemanticGraphRenderer(
 
             // EDGES
             // edge list
-            val edges: Collection<GraphEdge> = graph.edges
+            val gEdges: Collection<GraphEdge> = graph.edges
 
             // height and anchor allocator
             val allocator = Allocator(graph.nodes, graph.edges)
 
-            // System.out.println(allocator);
+            // println(allocator)
 
             // build edges
-            for (edge in edges) {
+            for (gEdge in gEdges) {
                 // segment
-                val fromWord = edge.source.segment
-                val toWord = edge.target.segment
+                val fromWord = gEdge.source.segment
+                val toWord = gEdge.target.segment
 
                 val isBackwards = fromWord.from > toWord.from
                 val leftSegment = if (isBackwards) toWord else fromWord
@@ -184,9 +184,9 @@ class SemanticGraphRenderer(
                 val rightRectangle: Rect = textComponent.modelToView(rightSegment)
 
                 // data
-                val label: String? = edge.label
-                val color: Int = relationPalette.invoke(edge)
-                val slot = allocator.getSlot(edge)
+                val label: String? = gEdge.label
+                val color: Int = relationPalette.invoke(gEdge)
+                val slot = allocator.getSlot(gEdge)
                 val edgeYOffset = slot * tagSpace // relative to first slot
                 val isVisible = firstEdgeBase + edgeYOffset < lastEdgeBase
 
@@ -196,13 +196,13 @@ class SemanticGraphRenderer(
                     val xEdge1 = leftRectangle.left + leftRectangle.width() / 2F
                     val xEdge2 = rightRectangle.left + rightRectangle.width() / 2F
                     val yEdge = leftRectangle.top + lineHeight + padTopOffset + firstEdgeBase + edgeYOffset
-                    val xAnchor1 = (allocator.getLeftAnchor(edge) * X_SHIFT).toInt()
-                    val xAnchor2 = (allocator.getRightAnchor(edge) * X_SHIFT).toInt()
+                    val xAnchor1 = (allocator.getLeftAnchor(gEdge) * X_SHIFT)
+                    val xAnchor2 = (allocator.getRightAnchor(gEdge) * X_SHIFT)
                     val yAnchor: Float = leftRectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
                     val bottom = leftRectangle.top + lineHeight + padTopOffset + padHeight
 
-                    val e: Edge = makeEdge(xEdge1, xEdge2, yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), bottom, label, isBackwards, isLeftTerminal = true, isRightTerminal = true, isVisible, color)
-                    this.edges.add(EdgeAnnotation(e))
+                    val edge: Edge = makeEdge(xEdge1, xEdge2, yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = true, isRightTerminal = true, isVisible, color, tagPaint = tagPaint)
+                    this.edges.add(EdgeAnnotation(edge))
 
                 } else {
                     // edge does not fit on line : make one edge per line
@@ -214,12 +214,12 @@ class SemanticGraphRenderer(
                         continue
                     }
 
-                    // for(Segment segment :segments) System.out.println(" segment=" + document.getString(segment));
+                    // for(Segment segment :segments) System.out.println(" segment=" + document.getString(segment))
                     val lastSegmentIndex = segments.size // last
 
                     // cursor
                     var xRight = leftRectangle.left + leftRectangle.width()
-                    //int xRightOfs = leftRectangle.width / 2;
+                    //int xRightOfs = leftRectangle.width / 2
                     var xLeft = leftRectangle.left
                     var xLeftOfs = leftRectangle.width() / 2
                     var y = leftRectangle.top
@@ -244,13 +244,13 @@ class SemanticGraphRenderer(
                             val xEdge1 = xLeft + xLeftOfs - (if (isFirst) 0 else X_MARGIN)
                             val xEdge2 = xRight + X_MARGIN
                             val yEdge = y + lineHeight + padTopOffset + firstEdgeBase + edgeYOffset
-                            val xAnchor1 = (allocator.getLeftAnchor(edge) * X_SHIFT).toInt()
-                            val xAnchor2 = (allocator.getRightAnchor(edge) * X_SHIFT).toInt()
+                            val xAnchor1 = (allocator.getLeftAnchor(gEdge) * X_SHIFT)
+                            val xAnchor2 = (allocator.getRightAnchor(gEdge) * X_SHIFT)
                             val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
-                            val e: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = false, isVisible, color)
-                            this.edges.add(EdgeAnnotation(e))
+                            val edge: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = false, isVisible, color, tagPaint = tagPaint)
+                            this.edges.add(EdgeAnnotation(edge))
 
                             // move ahead cursor1
                             val rectangle2: Rect = textComponent.modelToView(segment.from)
@@ -270,13 +270,13 @@ class SemanticGraphRenderer(
                             val xEdge1 = xLeft + xLeftOfs - (if (isFirst) 0 else X_MARGIN)
                             val xEdge2 = xRight - xRightOfs
                             val yEdge = y + lineHeight + padTopOffset + firstEdgeBase + edgeYOffset
-                            val xAnchor1 = (allocator.getLeftAnchor(edge) * X_SHIFT).toInt()
-                            val xAnchor2 = (allocator.getRightAnchor(edge) * X_SHIFT).toInt()
+                            val xAnchor1 = (allocator.getLeftAnchor(gEdge) * X_SHIFT)
+                            val xAnchor2 = (allocator.getRightAnchor(gEdge) * X_SHIFT)
                             val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
-                            val e: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight.toInt(), bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = true, isVisible, color)
-                            this.edges.add(EdgeAnnotation(e))
+                            val edge: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = true, isVisible, color, tagPaint = tagPaint)
+                            this.edges.add(EdgeAnnotation(edge))
                         }
                     }
                 }
@@ -358,11 +358,11 @@ class SemanticGraphRenderer(
 
         private const val EDGES_INSET_TOP = 10
 
-        private const val EDGES_INSET_BOTTOM = 0
+        private const val EDGES_INSET_BOTTOM = 10
 
-        private const val LABEL_TOP_INSET = 1
+        private const val LABEL_TOP_INSET = 15
 
-        private const val LABEL_BOTTOM_INSET = 1
+        private const val LABEL_BOTTOM_INSET = 15
 
         private const val LABEL_INFLATE = 1
 

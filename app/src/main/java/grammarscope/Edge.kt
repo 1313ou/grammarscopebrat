@@ -3,7 +3,6 @@ package grammarscope
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Paint.FontMetrics
 import android.graphics.PointF
 import android.graphics.RectF
 import android.graphics.Typeface
@@ -11,6 +10,7 @@ import grammarscope.SemanticGraphRenderer.Companion.height
 import grammarscope.Utils.drawDot
 import grammarscope.Utils.drawTriangle
 import kotlin.math.atan2
+import kotlin.math.min
 
 /**
  * Edge as used by renderer
@@ -64,11 +64,23 @@ data class Edge
     /**
      * Bottom past which this edge is not visible
      */
-    val bottom: Int,
+    val bottom: Float,
     /**
      * Edge tag (relation)
      */
     val tag: String,
+    /**
+     * Tag start position
+     */
+    val tagPosition: PointF,
+    /**
+     * Tag width
+     */
+    val tagWidth: Float,
+    /**
+     * Tag space
+     */
+    val tagRectangle: RectF,
     /**
      * Whether this label is vertical
      */
@@ -94,69 +106,6 @@ data class Edge
      */
     val color: Int,
 ) {
-
-    /**
-     * Tag start position
-     */
-    private val tagPosition: PointF
-
-    /**
-     * Tag space
-     */
-    val tagRectangle: RectF
-
-    /**
-     * Tag width
-     */
-    val tagWidth: Int
-
-    init {
-        if (isVertical) {
-
-            // tag width
-            val tagFontHeight = tagMetrics.height()
-            val tagFontDescent = tagMetrics.descent
-            tagWidth = tagFontHeight.toInt()
-            val paint = Paint()
-            val tagWidth: Float = paint.measureText(tag)
-
-            // tag position
-            val xa1 = x1 + x1Anchor
-            val xa2 = x2 + x2Anchor
-            val labelLeft = xa1 + (xa2 - xa1 - tagFontHeight) / 2 + tagFontDescent
-            val labelBase = yBase - LABEL_BOTTOM_INSET - LABEL_INFLATE
-            tagPosition = PointF(labelLeft, labelBase)
-
-            // tag rectangle
-            val x = tagPosition.x - tagFontDescent - LABEL_INFLATE
-            val y = yBase - LABEL_BOTTOM_INSET - LABEL_INFLATE - LABEL_INFLATE
-            val h = tagWidth + 2 * LABEL_INFLATE
-            val w = tagFontHeight + 2 * LABEL_INFLATE
-            tagRectangle = RectF(x, y, x + w, y + h)
-        } else {
-
-            // tag width
-            val paint = Paint()
-            tagWidth = paint.measureText(tag).toInt()
-
-            // tag position
-            val xa1 = x1 + x1Anchor
-            val xa2 = x2 + x2Anchor
-            val labelLeft = xa1 + (xa2 - xa1 - tagWidth) / 2
-            val fontDescent: Float = tagMetrics.descent
-            val labelBase: Float = yBase - LABEL_BOTTOM_INSET - LABEL_INFLATE - fontDescent
-            tagPosition = PointF(labelLeft, labelBase)
-
-            // tag rectangle
-            val tagFontHeight: Float = tagMetrics.height()
-            val x = tagPosition.x - LABEL_INFLATE
-            val y = (yBase - LABEL_BOTTOM_INSET - LABEL_INFLATE - tagFontHeight - LABEL_INFLATE)
-            val w = tagWidth + 2 * LABEL_INFLATE
-            val h = tagFontHeight + 2 * LABEL_INFLATE
-            tagRectangle = RectF(x, y, x + w, y + h)
-        }
-    }
-
     // P O S I T I O N   A N D   L A Y O U T
 
     /**
@@ -316,8 +265,6 @@ data class Edge
     companion object {
         var tagFont: Typeface = Typeface.SANS_SERIF
 
-        var tagMetrics: FontMetrics = FontMetrics()
-
         const val ARROW_TIP_WIDTH = 15F
         const val ARROW_TIP_HEIGHT = 15F
         const val ARROW_START_DIAMETER = 10F
@@ -372,6 +319,53 @@ data class Edge
             arrowStartColor = color ?: DEFAULT_ARROW_START_COLOR
         }
 
+        fun computeTag(tag: String, isVertical: Boolean, x1: Float, x1Anchor: Float, x2: Float, x2Anchor: Float, yBase: Float, tagPaint: Paint): Triple<PointF, Float, RectF> {
+            if (isVertical) {
+
+                // tag width
+                val tagFontHeight = tagPaint.fontMetrics.height()
+                val tagFontDescent = tagPaint.fontMetrics.descent
+                val tagWidth = tagFontHeight
+
+                // tag position
+                val xa1 = x1 + x1Anchor
+                val xa2 = x2 + x2Anchor
+                val labelLeft = xa1 + (xa2 - xa1 - tagFontHeight) / 2 + tagFontDescent
+                val labelBase = yBase - LABEL_BOTTOM_INSET - LABEL_INFLATE
+                val tagPosition = PointF(labelLeft, labelBase)
+
+                // tag rectangle
+                val x = tagPosition.x - tagFontDescent - LABEL_INFLATE
+                val y = yBase - LABEL_BOTTOM_INSET - LABEL_INFLATE - LABEL_INFLATE
+                val h = tagPaint.measureText(tag) + 2 * LABEL_INFLATE
+                val w = tagFontHeight + 2 * LABEL_INFLATE
+                val tagRectangle = RectF(x, y, x + w, y + h)
+
+                return Triple(tagPosition, tagWidth, tagRectangle)
+            } else {
+
+                // tag width
+                val tagWidth = tagPaint.measureText(tag)
+
+                // tag position
+                val xa1 = x1 + x1Anchor
+                val xa2 = x2 + x2Anchor
+                val labelLeft = xa1 + (xa2 - xa1 - tagWidth) / 2
+                val fontDescent: Float = tagPaint.fontMetrics.descent
+                val labelBase: Float = yBase - LABEL_BOTTOM_INSET - LABEL_INFLATE - fontDescent
+                val tagPosition = PointF(labelLeft, labelBase)
+
+                // tag rectangle
+                val tagFontHeight: Float = tagPaint.fontMetrics.height()
+                val x = tagPosition.x - LABEL_INFLATE
+                val y = (yBase - LABEL_BOTTOM_INSET - LABEL_INFLATE - tagFontHeight - LABEL_INFLATE)
+                val w = tagWidth + 2 * LABEL_INFLATE
+                val h = tagFontHeight + 2 * LABEL_INFLATE
+                val tagRectangle = RectF(x, y, x + w, y + h)
+
+                return Triple(tagPosition, tagWidth, tagRectangle)
+            }
+        }
 
         /**
          * Make edge
@@ -395,10 +389,10 @@ data class Edge
             fromX: Float,
             toX: Float,
             baseY: Float,
-            fromAnchorX: Int,
-            toAnchorX: Int,
+            fromAnchorX: Float,
+            toAnchorX: Float,
             yAnchor: Float,
-            height: Int,
+            height: Float,
             bottom: Float,
             label: String?,
             isBackwards: Boolean,
@@ -406,34 +400,43 @@ data class Edge
             isRightTerminal: Boolean,
             isVisible: Boolean,
             color: Int,
-        ): Edge {
-            // edge
-            val width = toX + toAnchorX - (fromX + fromAnchorX)
+            tagPaint: Paint,
 
-            // label
-            val (edgeLabel, isVertical) = truncate(label, width, tagMetrics)
+            ): Edge {
+
+            // tag
+            val maxWidth = toX + toAnchorX - (fromX + fromAnchorX)
+            val (tag, isVertical) = processTag(label, maxWidth, tagPaint)
+            val (tagPosition, tagWidth, tagRectangle) = computeTag(tag, isVertical, fromX, fromAnchorX, toX, toAnchorX, baseY, tagPaint)
 
             // edge
             val edge = Edge(
                 fromX,
                 toX,
                 baseY,
-                fromAnchorX.toFloat(),
-                toAnchorX.toFloat(),
-                yAnchor.toFloat(),
-                height.toFloat(),
-                bottom.toInt(),
-                edgeLabel,
+                fromAnchorX,
+                toAnchorX,
+                yAnchor,
+                height,
+                bottom,
+                tag,
+                tagPosition,
+                tagWidth,
+                tagRectangle,
                 isVertical = isVertical,
                 isBackwards = isBackwards,
                 isLeftTerminal = isLeftTerminal,
                 isRightTerminal = isRightTerminal,
                 isVisible = isVisible,
                 color,
-             )
-
+            )
             return edge
         }
+
+        /**
+         * Truncate margin
+         */
+        const val TRUNCATE_MARGIN = 30
 
         /**
          * Character used when there is not enough space. If null, label will be truncated, and rotated 90°
@@ -445,16 +448,52 @@ data class Edge
          */
         const val LABEL_VERTICAL_TRUNCATE: Int = 4
 
-        const val TRUNCATE_MARGIN = 0
+        fun processTag(label: String?, maxWidth: Float, paint: Paint): Pair<String, Boolean> {
+            if (label == null) {
+                return "" to false
+            }
+            // truncate if needed to fit in
+            var isVertical = false
+            var truncatedLabel: String? = truncate(label!!, maxWidth - TRUNCATE_MARGIN, paint)
+            if (truncatedLabel == null) {
+                // has failed
+                if (LABEL_STAND_IN_CHAR != null) truncatedLabel = LABEL_STAND_IN_CHAR
+                else {
+                    truncatedLabel = label
+                    if (truncatedLabel.length > LABEL_VERTICAL_TRUNCATE) truncatedLabel = label.substring(0, min(LABEL_VERTICAL_TRUNCATE.toDouble(), label.length.toDouble()).toInt()) + '⋯'
+                    isVertical = true
+                }
+            }
+            return truncatedLabel to isVertical
+        }
 
-        fun truncate(label: String?, width: Float, metrics: FontMetrics): Pair<String, Boolean> {
-            //TODO
-            //if (label == null) {
-            //    return LABEL_STAND_IN_CHAR ?: (isVertical = true)
-            //} - TRUNCATE_MARGIN
-            //val truncated = label.substring(0, LABEL_VERTICAL_TRUNCATE.coerceAtMost(label.length)) + '⋯'
-            //truncatedLabel?.length?.let { if (it > LABEL_VERTICAL_TRUNCATE) truncatedLabel =  }
-            return (label ?: "") to false
+        /**
+         * Truncate label to width
+         *
+         * @param label   label
+         * @param width   width
+         * @param paint   paint for text measurement
+         * @return truncate label, null if can't
+         */
+        fun truncate(label: String, width: Float, paint: Paint): String? {
+            val tagCharWidth: Float = paint.measureText("M")
+            val n = (width / tagCharWidth).toInt()
+
+            // if available space width less than one character, return null
+            if (n < 1) return null // can't
+
+            // do not truncate if all fits in
+            val xOffset = (width - paint.measureText(label)) / 2
+            if (xOffset > 0) return label
+
+            // truncate
+            val truncatedLabel: String
+            if (n >= 3) {
+                truncatedLabel = label.substring(0, min(n - 2, label.length).toInt()) + '⋯'
+            } else {
+                truncatedLabel = label.substring(0, min(n, label.length))
+            }
+            return truncatedLabel
         }
     }
 }
