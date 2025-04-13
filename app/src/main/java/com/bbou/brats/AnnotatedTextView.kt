@@ -4,8 +4,10 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Paint.FontMetrics
 import android.graphics.Rect
 import android.graphics.RectF
+import android.text.Layout
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
@@ -15,7 +17,9 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.graphics.toColorInt
 import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
+import grammarscope.Segment
 import grammarscope.SemanticGraphPainter
+import kotlin.math.max
 
 class AnnotatedTextView @JvmOverloads constructor(
     context: Context,
@@ -24,14 +28,6 @@ class AnnotatedTextView @JvmOverloads constructor(
 ) : AppCompatTextView(context, attrs, defStyleAttr) {
 
     internal val annotations = mutableListOf<Annotation>()
-
-    /**
-     * Add an icon below a specific word (in the space between lines)
-     */
-    fun addAnnotation(wordStart: Int, wordEnd: Int) {
-        //annotations.add( )
-        invalidate()
-    }
 
     /**
      * Highlight a specific word
@@ -60,8 +56,8 @@ class AnnotatedTextView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
+        dumpLineText()
         drawAnnotationSpace(canvas)
-        drawWordSpace(canvas)
 
         // Draw text
         super.onDraw(canvas)
@@ -73,15 +69,14 @@ class AnnotatedTextView @JvmOverloads constructor(
         //     annotation.draw(canvas, this)
         // }
 
-        val edgeAnnotations = annotations.filter { it is EdgeAnnotation }.map { it as EdgeAnnotation }
         val boxAnnotations = annotations.filter { it is BoxAnnotation }.map { it as BoxAnnotation }
-        val padWidth: Int = width
-
         SemanticGraphPainter.paintBoxes(canvas, boxAnnotations)
-        SemanticGraphPainter.paintEdges(canvas, edgeAnnotations, padWidth, renderAsCurves = true)
+
+        val edgeAnnotations = annotations.filter { it is EdgeAnnotation }.map { it as EdgeAnnotation }
+        SemanticGraphPainter.paintEdges(canvas, edgeAnnotations, padWidth = width, renderAsCurves = true)
     }
 
-    private fun drawWordSpace(canvas: Canvas) {
+    private fun dumpLineText() {
         val lineCount = layout.lineCount
         for (line in 0 until lineCount) {
             val lineStart: Int = layout.getLineStart(line)
@@ -211,3 +206,51 @@ fun TextView.getWordPosition(wordStart: Int, wordEnd: Int): Rect? {
         return null
     }
 }
+
+/**
+ * Get rectangle for segment in text
+ *
+ * @param segment       target segment
+ * @return rectangle
+ */
+fun TextView.modelToView(segment: Segment): Rect {
+
+    val fromRectangle: Rect = modelToView(segment.from)
+    val toRectangle: Rect = modelToView(segment.to)
+    val left = fromRectangle.left.toInt()
+    val top = fromRectangle.top.toInt()
+    val right = toRectangle.right.toInt()
+    val bottom = max(fromRectangle.bottom, toRectangle.bottom)
+    return Rect(left, top, right, bottom)
+}
+
+fun TextView.modelToView(pos: Int): Rect {
+    if (pos < 0 || pos > text.length) {
+        return throw IllegalArgumentException("Invalid position: $pos")
+    }
+    val metrics: FontMetrics = paint.fontMetrics
+    val layout: Layout = layout
+    val line: Int = layout.getLineForOffset(pos)
+    val baseline: Int = layout.getLineBaseline(line)
+    val top = baseline + metrics.ascent + paddingTop //layout.getLineTop(line)
+    val bottom = baseline + metrics.descent + paddingTop // layout.getLineBottom(line)
+    val x: Float = layout.getPrimaryHorizontal(pos)
+    val width: Float = if (pos < text.length) {
+        layout.getPrimaryHorizontal(pos + 1) - x
+    } else {
+        // Handle the end of the text.
+        if (text.isNotEmpty()) {
+            // Get the previous character position.
+            val previousPos = pos - 1
+            val previousX = layout.getPrimaryHorizontal(previousPos)
+            x - previousX
+        } else {
+            // Handle empty text.
+            0F
+        }
+    }
+    val left = x.toInt() + paddingLeft
+    val right = (left + width).toInt()
+    return Rect(left, top.toInt(), right, bottom.toInt())
+}
+

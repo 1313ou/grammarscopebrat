@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.core.graphics.toColorInt
 import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
+import com.bbou.brats.modelToView
 import grammarscope.Edge.Companion.makeEdge
 import grammarscope.allocator.Allocator
 import grammarscope.document.Document
@@ -291,54 +292,7 @@ class SemanticGraphRenderer(
         SemanticGraphPainter.paintEdges(canvas, this.edges, this.padWidth, this.renderAsCurves)
     }
 
-    /**
-     * Get rectangle for segment in text
-     *
-     * @param segment       target segment
-     * @return rectangle
-     */
-    private fun TextView.modelToView(segment: Segment): Rect {
-
-        val fromRectangle: Rect = modelToView(segment.from)
-        val toRectangle: Rect = modelToView(segment.to)
-        val left = fromRectangle.left.toInt()
-        val top = fromRectangle.top.toInt()
-        val right = toRectangle.right.toInt()
-        val bottom = max(fromRectangle.bottom, toRectangle.bottom)
-        return Rect(left, top, right, bottom)
-    }
-
-    private fun TextView.modelToView(pos: Int): Rect {
-        if (pos < 0 || pos > text.length) {
-            return throw IllegalArgumentException("Invalid position: $pos")
-        }
-        val metrics: FontMetrics = paint.fontMetrics
-        val layout: Layout = layout
-        val line: Int = layout.getLineForOffset(pos)
-        val baseline: Int = layout.getLineBaseline(line)
-        val top = baseline + metrics.ascent + paddingTop //layout.getLineTop(line)
-        val bottom = baseline + metrics.descent + paddingTop // layout.getLineBottom(line)
-        val x: Float = layout.getPrimaryHorizontal(pos)
-        val width: Float = if (pos < text.length) {
-            layout.getPrimaryHorizontal(pos + 1) - x
-        } else {
-            // Handle the end of the text.
-            if (text.isNotEmpty()) {
-                // Get the previous character position.
-                val previousPos = pos - 1
-                val previousX = layout.getPrimaryHorizontal(previousPos)
-                x - previousX
-            } else {
-                // Handle empty text.
-                0F
-            }
-        }
-        val left = x.toInt() + paddingLeft
-        val right = (left + width).toInt()
-        return Rect(left, top.toInt(), right, bottom.toInt())
-    }
-
-    companion object {
+     companion object {
 
         @JvmStatic
         fun FontMetrics.height(): Float {

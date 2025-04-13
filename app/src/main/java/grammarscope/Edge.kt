@@ -9,6 +9,7 @@ import android.graphics.Typeface
 import grammarscope.SemanticGraphRenderer.Companion.height
 import grammarscope.Utils.drawDot
 import grammarscope.Utils.drawTriangle
+import java.lang.Math.toDegrees
 import kotlin.math.atan2
 import kotlin.math.min
 
@@ -197,30 +198,30 @@ data class Edge
         if (isRightTerminal && !isBackwards) {
             // int xc = (int) shape.getXCornerRight();
             // int yc = yText;
-            // Utils.drawTriangle(g2, ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, false);
-            // double theta = Math.atan2((double)y - yc, (double)x - xc); // corner
-            val theta = atan2(yTo.toDouble() - cty, xTo.toDouble() - ctx1)
+            // drawTriangle(g2, ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, false)
+            // double theta = toDegrees(atan2((double)y - yc, (double)x - xc)) // corner
+            val theta = toDegrees(atan2(yTo.toDouble() - cty, xTo.toDouble() - ctx1))
             val paint = Paint().apply {
                 color = arrowTipColor
             }
-            g2.drawTriangle(xTo, yTo, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, false, theta.toFloat(), paint)
+            g2.drawTriangle(xTo, yTo, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = false, rotation = theta.toFloat(), paint)
 
         } else if (isLeftTerminal && isBackwards) {
             // int xc = (int) shape.getXCornerLeft();
             // int yc = yText;
-            // Utils.drawTriangle(g2, ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, true);
-            // double theta = Math.atan2((double)yc - y, (double)xc - x); // corner
-            val theta = atan2(cty.toDouble() - yFrom, ctx2.toDouble() - xFrom)
+            // Utils.drawTriangle(g2, ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, true)
+            // double theta = toDegrees(atan2((double)yc - y, (double)xc - x)) // corner
+            val theta = toDegrees(atan2(cty.toDouble() - yFrom, ctx2.toDouble() - xFrom))
             val paint = Paint().apply {
                 color = arrowTipColor
             }
-            g2.drawTriangle(xFrom, yFrom, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, true, theta.toFloat(), paint)
+            g2.drawTriangle(xFrom, yFrom, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = true, rotation = theta.toFloat(), paint)
         }
 
-        // Utils.drawDot(g2, Color.RED, cox1, cty, 1);
-        // Utils.drawDot(g2, Color.RED, cox2, cty, 1);
-        // Utils.drawDiamond(g2, Color.BLUE, ctx1, cty, 1);
-        // Utils.drawDiamond(g2, Color.BLUE, ctx2, cty, 1);
+        // Utils.drawDot(g2, Color.RED, cox1, cty, 1)
+        // Utils.drawDot(g2, Color.RED, cox2, cty, 1)
+        // Utils.drawDiamond(g2, Color.BLUE, ctx1, cty, 1)
+        // Utils.drawDiamond(g2, Color.BLUE, ctx2, cty, 1)
     }
 
     /**
@@ -454,7 +455,7 @@ data class Edge
             }
             // truncate if needed to fit in
             var isVertical = false
-            var truncatedLabel: String? = truncate(label!!, maxWidth - TRUNCATE_MARGIN, paint)
+            var truncatedLabel: String? = truncate(label, maxWidth - TRUNCATE_MARGIN, paint)
             if (truncatedLabel == null) {
                 // has failed
                 if (LABEL_STAND_IN_CHAR != null) truncatedLabel = LABEL_STAND_IN_CHAR
@@ -487,13 +488,11 @@ data class Edge
             if (xOffset > 0) return label
 
             // truncate
-            val truncatedLabel: String
-            if (n >= 3) {
-                truncatedLabel = label.substring(0, min(n - 2, label.length).toInt()) + '⋯'
+            return if (n >= 3) {
+                label.substring(0, min(n - 2, label.length).toInt()) + '⋯'
             } else {
-                truncatedLabel = label.substring(0, min(n, label.length))
+                label.substring(0, min(n, label.length))
             }
-            return truncatedLabel
-        }
+         }
     }
 }
