@@ -17,11 +17,6 @@ class AnnotatedTextActivity : AppCompatActivity() {
         setContentView(R.layout.annotated_text)
         val textControl = findViewById<AnnotatedTextControl>(R.id.annotated_text_control)
         textView = findViewById<AnnotatedTextView>(textControl.textViewId)
-
-        val lineSpacingExtra = 350f
-        val lineSpacingMultiplier = 1.0f // Default multiplier
-        textView.setLineSpacing(lineSpacingExtra, lineSpacingMultiplier)
-
         textView.post {
             prepare()
         }

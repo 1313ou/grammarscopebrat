@@ -12,30 +12,42 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class AnnotatedTextControl(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
 
+    private val initialTextSize = 24f
+    private val minTextSize = 12f
+    private val maxTextSize = 36f
+    private val textSizeIncrement = 2f
+    private var currentTextSize = initialTextSize
+
+    private val initialSpacing = 350f
+    private val minSpacing = 100f
+    private val maxSpacing = 500f
+    private val spacingIncrement = 50f
+    private val lineSpacingMultiplier = 1.0f
+    private var currentSpacing = initialSpacing
+
+    private val padding = 16
+
     private val textView: AppCompatTextView = AnnotatedTextView(context).apply {
         id = generateViewId()
-        textSize = 24f
-        setPadding(16)
+        textSize = initialTextSize
+        setLineSpacing(initialSpacing, lineSpacingMultiplier)
+        setPadding(padding)
         ellipsize = TruncateAt.END
-        text="First line\nSecond line\nThird line\nFourth line"
+
+        text = "First line\nSecond line\nThird line\nFourth line"
     }
 
     val textViewId = textView.id
 
     private val increaseButton: FloatingActionButton = FloatingActionButton(context).apply {
         id = generateViewId()
-        setImageResource(android.R.drawable.btn_plus)
+        setImageResource(R.drawable.btn_expand)
     }
 
     private val decreaseButton: FloatingActionButton = FloatingActionButton(context).apply {
         id = generateViewId()
-        setImageResource(android.R.drawable.btn_minus)
+        setImageResource(R.drawable.btn_collapse)
     }
-
-    private var currentTextSize = 24f // Initial text size
-    private val minTextSize = 12f
-    private val maxTextSize = 36f
-    private val textSizeIncrement = 2f
 
     init {
         addView(textView, LayoutParams(0, 0))
@@ -64,11 +76,25 @@ class AnnotatedTextControl(context: Context, attrs: AttributeSet?) : ConstraintL
         }
 
         increaseButton.setOnClickListener {
-            increaseTextSize()
+            increaseSpacing()
         }
 
         decreaseButton.setOnClickListener {
-            decreaseTextSize()
+            decreaseSpacing()
+        }
+    }
+
+    private fun increaseSpacing() {
+        if (currentSpacing < maxSpacing) {
+            currentSpacing += spacingIncrement
+            textView.setLineSpacing(currentSpacing, lineSpacingMultiplier)
+        }
+    }
+
+    private fun decreaseSpacing() {
+        if (currentSpacing > minSpacing) {
+            currentSpacing -= spacingIncrement
+            textView.setLineSpacing(currentSpacing, lineSpacingMultiplier)
         }
     }
 
@@ -86,8 +112,7 @@ class AnnotatedTextControl(context: Context, attrs: AttributeSet?) : ConstraintL
         }
     }
 
-    fun setText(text : String)
-    {
+    fun setText(text: String) {
         textView.text = text
     }
 }
