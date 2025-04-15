@@ -13,8 +13,6 @@ import com.bbou.brats.Annotation.EdgeAnnotation
 
 object SemanticGraphPainter {
 
-    // P A I N T
-
     fun paintBoxes(g: Canvas, boxAnnotations: Collection<BoxAnnotation>) {
         for (boxAnnotation in boxAnnotations) {
             // drawBox(g, boxAnnotation.box)
@@ -106,6 +104,10 @@ object SemanticGraphPainter {
         // g.drawLine(boxL, boxT, boxR, boxT) // pad topOffset
         // g.drawLine(boxL, boxB, boxR, boxB) // pad bottom
     }
+    /**
+     * Back color
+     */
+    var backColor: Int = "#80C6DBEE".toColorInt()
 
     var spanColor: Int = 0
     var axisColor: Int = 0

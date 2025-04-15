@@ -10,6 +10,12 @@ import grammarscope.Edge
 import grammarscope.IRenderer
 
 // Sealed class for different types of between-lines annotations
+
+enum class AnnotationType {
+    BOX,
+    EDGE
+}
+
 sealed class Annotation {
 
     abstract fun draw(canvas: Canvas, textView: AnnotatedTextView)

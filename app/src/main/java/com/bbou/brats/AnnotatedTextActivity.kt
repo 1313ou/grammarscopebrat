@@ -18,26 +18,8 @@ class AnnotatedTextActivity : AppCompatActivity() {
         val textControl = findViewById<AnnotatedTextControl>(R.id.annotated_text_control)
         textView = findViewById<AnnotatedTextView>(textControl.textViewId)
         textView.post {
-            prepare()
+            textView.prepare()
         }
-    }
-
-    fun prepare() {
-        val document = SampleDocument()
-        val text = document.text
-        textView.text = text
-
-        // Highlight root
-        //val rootPos = findWordPosition(text, "gave")
-        //if (rootPos != null) {
-        //    textView.highlightWord(rootPos.first, rootPos.second, "#FFEB3B".toColorInt())
-        //}
-
-        // renderer
-        renderer = SemanticGraphRenderer(textView, true)
-        renderer.layout(document, textView)
-        textView.annotations.addAll(renderer.boxes)
-        textView.annotations.addAll(renderer.edges)
     }
 
     /**

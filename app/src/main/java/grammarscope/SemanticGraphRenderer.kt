@@ -1,15 +1,15 @@
 package grammarscope
 
-import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Paint.FontMetrics
 import android.graphics.Rect
 import android.graphics.RectF
-import android.text.Layout
 import android.widget.TextView
 import androidx.core.graphics.toColorInt
+import com.bbou.brats.Annotation
 import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
+import com.bbou.brats.AnnotationType
 import com.bbou.brats.modelToView
 import grammarscope.Edge.Companion.makeEdge
 import grammarscope.allocator.Allocator
@@ -17,7 +17,6 @@ import grammarscope.document.Document
 import grammarscope.document.Graph
 import grammarscope.document.GraphEdge
 import grammarscope.document.GraphNode
-import kotlin.math.max
 
 /**
  * Semantic graph renderer
@@ -30,27 +29,18 @@ import kotlin.math.max
 class SemanticGraphRenderer(
     val textView: TextView,
     val renderAsCurves: Boolean
-) : IRenderer {
+) {
 
     /**
      * Height
      */
     var height: Int = textView.height - textView.paddingTop - textView.paddingBottom
 
-    /**
-     * Width
-     */
-    private var width = textView.width - textView.paddingRight - textView.paddingLeft
 
     /**
      * Top
      */
     private val padTopOffset: Int = 5
-
-    /**
-     * Annotation pad width
-     */
-    private var padWidth = width
 
     /**
      * Annotation pad width
@@ -70,24 +60,7 @@ class SemanticGraphRenderer(
     /**
      * Relation palette
      */
-    private lateinit var relationPalette: (GraphEdge) -> Int
-
-    /**
-     * Back color
-     */
-    val backColor: Int = DEFAULT_BACKCOLOR
-
-    // DATA
-
-    /**
-     * Edges to draw
-     */
-    internal val edges: MutableCollection<EdgeAnnotation> = ArrayList()
-
-    /**
-     * Boxes to draw
-     */
-    internal val boxes: MutableCollection<BoxAnnotation> = ArrayList()
+    private var relationPalette: (GraphEdge) -> Int = { e -> "#FF0000".toColorInt() }
 
     // L A Y O U T
 
@@ -117,16 +90,14 @@ class SemanticGraphRenderer(
     pad bottom = pad height
     */
 
-    override fun layout(
+    fun annotate(
         document: Document,
-        textComponent: TextView,
-    ): Int {
-        if (document.sentenceCount == 0) return 0
+    ): Pair<Map<AnnotationType, Collection<Annotation>>, Int>? {
+        if (document.sentenceCount == 0) return null
 
         // dumpLines()
-
-        //
-        relationPalette = { e -> "#FF0000".toColorInt() }
+        val edges: MutableCollection<EdgeAnnotation> = ArrayList()
+        val boxes: MutableCollection<BoxAnnotation> = ArrayList()
 
         // space height
         val tagFontHeight: Float = tagPaint.fontMetrics.height()
@@ -135,7 +106,7 @@ class SemanticGraphRenderer(
 
         // where edges start (slot 0)
         val firstEdgeBase: Float = PAD_TOP_INSET + EDGES_INSET_TOP + tagSpace // relative to pad topOffset
-        if (firstEdgeBase > padHeight) return 0
+        if (firstEdgeBase > padHeight) return null
         val lastEdgeBase: Float = padHeight - PAD_BOTTOM_INSET - EDGES_INSET_BOTTOM // relative to pad
 
         // topOffset
@@ -150,7 +121,7 @@ class SemanticGraphRenderer(
 
                 // location
                 val segment = node.segment
-                val rectangle: Rect = textComponent.modelToView(segment)
+                val rectangle: Rect = textView.modelToView(segment)
 
                 // val boxL = rectangle.left
                 // val boxT: Float = rectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
@@ -158,7 +129,7 @@ class SemanticGraphRenderer(
                 // val boxW = rectangle.width()
                 // val box = RectF(boxL.toFloat(), boxT, boxW.toFloat(), boxH)
                 val box = RectF(rectangle)
-                this.boxes.add(BoxAnnotation(box))
+                boxes.add(BoxAnnotation(box))
             }
 
             // EDGES
@@ -181,8 +152,8 @@ class SemanticGraphRenderer(
                 val rightSegment = if (isBackwards) fromWord else toWord
 
                 // location
-                val leftRectangle: Rect = textComponent.modelToView(leftSegment)
-                val rightRectangle: Rect = textComponent.modelToView(rightSegment)
+                val leftRectangle: Rect = textView.modelToView(leftSegment)
+                val rightRectangle: Rect = textView.modelToView(rightSegment)
 
                 // data
                 val label: String? = gEdge.label
@@ -203,7 +174,7 @@ class SemanticGraphRenderer(
                     val bottom = leftRectangle.top + lineHeight + padTopOffset + padHeight
 
                     val edge: Edge = makeEdge(xEdge1, xEdge2, yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = true, isRightTerminal = true, isVisible, color, tagPaint = tagPaint)
-                    this.edges.add(EdgeAnnotation(edge))
+                    edges.add(EdgeAnnotation(edge))
 
                 } else {
                     // edge does not fit on line : make one edge per line
@@ -234,7 +205,7 @@ class SemanticGraphRenderer(
                         currentSegmentIndex++
 
                         // if is not visible
-                        val rectangle: Rect? = textComponent.modelToView(segment)
+                        val rectangle: Rect? = textView.modelToView(segment)
                         if (rectangle == null) {
                             continue
                         }
@@ -251,10 +222,10 @@ class SemanticGraphRenderer(
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
                             val edge: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = false, isVisible, color, tagPaint = tagPaint)
-                            this.edges.add(EdgeAnnotation(edge))
+                            edges.add(EdgeAnnotation(edge))
 
                             // move ahead cursor1
-                            val rectangle2: Rect = textComponent.modelToView(segment.from)
+                            val rectangle2: Rect = textView.modelToView(segment.from)
                             xLeft = rectangle2.left
                             xLeftOfs = rectangle2.width() / 2
                             y = rectangle2.top
@@ -277,32 +248,23 @@ class SemanticGraphRenderer(
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
                             val edge: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = true, isVisible, color, tagPaint = tagPaint)
-                            this.edges.add(EdgeAnnotation(edge))
+                            edges.add(EdgeAnnotation(edge))
                         }
                     }
                 }
             }
             break
         }
-        return this.height
+        return mapOf(AnnotationType.EDGE to edges, AnnotationType.BOX to boxes) to this.height
     }
 
-    override fun paint(canvas: Canvas) {
-        SemanticGraphPainter.paintBoxes(canvas, this.boxes)
-        SemanticGraphPainter.paintEdges(canvas, this.edges, this.padWidth, this.renderAsCurves)
-    }
-
-     companion object {
+    companion object {
 
         @JvmStatic
         fun FontMetrics.height(): Float {
             return descent - ascent + leading // precise line height information, and be sure you're including the inter-line spacing
             // return fontSpacing // a quick approximation of the line height.
         }
-
-        // COLORS
-
-        private const val DEFAULT_BACKCOLOR: Int = 0x80C6DBEE.toInt()
 
         // INSETS / MARGINS / OFFSETS
 

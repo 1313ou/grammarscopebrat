@@ -20,7 +20,7 @@ class AnnotatedTextControl(context: Context, attrs: AttributeSet?) : ConstraintL
 
     private val initialSpacing = 350f
     private val minSpacing = 100f
-    private val maxSpacing = 500f
+    private val maxSpacing = 750f
     private val spacingIncrement = 50f
     private val lineSpacingMultiplier = 1.0f
     private var currentSpacing = initialSpacing
@@ -33,20 +33,18 @@ class AnnotatedTextControl(context: Context, attrs: AttributeSet?) : ConstraintL
         setLineSpacing(initialSpacing, lineSpacingMultiplier)
         setPadding(padding)
         ellipsize = TruncateAt.END
-
-        text = "First line\nSecond line\nThird line\nFourth line"
     }
 
     val textViewId = textView.id
 
     private val increaseButton: FloatingActionButton = FloatingActionButton(context).apply {
         id = generateViewId()
-        setImageResource(R.drawable.btn_expand)
+        setImageResource(R.drawable.btn_plus)
     }
 
     private val decreaseButton: FloatingActionButton = FloatingActionButton(context).apply {
         id = generateViewId()
-        setImageResource(R.drawable.btn_collapse)
+        setImageResource(R.drawable.btn_minus)
     }
 
     init {

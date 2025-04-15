@@ -19,6 +19,8 @@ import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
 import grammarscope.Segment
 import grammarscope.SemanticGraphPainter
+import grammarscope.SemanticGraphRenderer
+import grammarscope.document.SampleDocument
 import kotlin.math.max
 
 class AnnotatedTextView @JvmOverloads constructor(
@@ -27,53 +29,58 @@ class AnnotatedTextView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : AppCompatTextView(context, attrs, defStyleAttr) {
 
-    internal val annotations = mutableListOf<Annotation>()
+    val document = SampleDocument()
 
-    /**
-     * Highlight a specific word
-     */
-    fun highlightWord(wordStart: Int, wordEnd: Int, color: Int = Color.YELLOW) {
-        val spannable = if (text is SpannableString) {
-            text as SpannableString
-        } else {
-            SpannableString(text)
-        }
-        spannable.setSpan(
-            BackgroundColorSpan(color),
-            wordStart,
-            wordEnd,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        text = spannable
+    internal lateinit var annotations: Map<AnnotationType, Collection<Annotation>>
+
+    fun prepare() {
+        val text = document.text
+        this.text = text
+
+        // Highlight root
+        //val rootPos = findWordPosition(text, "gave")
+        //if (rootPos != null) {
+        //    textView.highlightWord(rootPos.first, rootPos.second, "#FFEB3B".toColorInt())
+        //}
     }
 
-    /**
-     * Clear all annotations
-     */
-    fun clearAnnotations() {
-        annotations.clear()
-        invalidate()
+    fun annotate() {
+        // renderer
+        val (annotations, height) = SemanticGraphRenderer(this, true).annotate(document)!!
+        this.annotations = annotations
+    }
+
+    override fun requestLayout() {
+        super.requestLayout()
+    }
+
+    override fun invalidate() {
+        super.invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
-        dumpLineText()
-        drawAnnotationSpace(canvas)
 
         // Draw text
         super.onDraw(canvas)
 
-        //drawLineSpace(canvas)
+        if (text != "") {
+            dumpLineText()
+            drawAnnotationSpace(canvas)
+            //drawLineSpace(canvas)
 
-        // Draw all annotations
-        // for (annotation in annotations) {
-        //     annotation.draw(canvas, this)
-        // }
+            annotate()
 
-        val boxAnnotations = annotations.filter { it is BoxAnnotation }.map { it as BoxAnnotation }
-        SemanticGraphPainter.paintBoxes(canvas, boxAnnotations)
+            // Draw all annotations
+            // for (annotation in annotations) {
+            //     annotation.draw(canvas, this)
+            // }
 
-        val edgeAnnotations = annotations.filter { it is EdgeAnnotation }.map { it as EdgeAnnotation }
-        SemanticGraphPainter.paintEdges(canvas, edgeAnnotations, padWidth = width, renderAsCurves = true)
+            val boxAnnotations = annotations[AnnotationType.BOX]!!.map { it as BoxAnnotation }
+            SemanticGraphPainter.paintBoxes(canvas, boxAnnotations)
+
+            val edgeAnnotations = annotations[AnnotationType.EDGE]!!.map { it as EdgeAnnotation }
+            SemanticGraphPainter.paintEdges(canvas, edgeAnnotations, padWidth = width, renderAsCurves = true)
+        }
     }
 
     private fun dumpLineText() {
@@ -174,6 +181,24 @@ class AnnotatedTextView @JvmOverloads constructor(
             canvas.drawLine(x2, top, x3, top, paintTop)
             canvas.drawLine(x2, bottom, x3, bottom, paintBottom)
         }
+    }
+
+    /**
+     * Highlight a specific word
+     */
+    fun highlightWord(wordStart: Int, wordEnd: Int, color: Int = Color.YELLOW) {
+        val spannable = if (text is SpannableString) {
+            text as SpannableString
+        } else {
+            SpannableString(text)
+        }
+        spannable.setSpan(
+            BackgroundColorSpan(color),
+            wordStart,
+            wordEnd,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        text = spannable
     }
 }
 
