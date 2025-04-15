@@ -128,17 +128,16 @@ object DependencyPainter {
      */
     fun setAxisColor(color: Int?) {
         axisColor = color ?: DEFAULT_AXIS_COLOR
-
     }
 
-    val DEFAULT_SPAN_COLOR: Int = Color.GRAY
-    val DEFAULT_AXIS_COLOR: Int = Color.WHITE
-    val DEFAULT_OVERFLOW_COLOR: Int = Color.GRAY
+    const val DEFAULT_SPAN_COLOR: Int = Color.GRAY
+    const val DEFAULT_AXIS_COLOR: Int = Color.WHITE
+    const val DEFAULT_OVERFLOW_COLOR: Int = Color.GRAY
 
-    val OVERFLOW_X_OFFSET = 0F
-    val OVERFLOW_Y_OFFSET = 0F
-    val OVERFLOW_WIDTH = 0F
-    val OVERFLOW_HEIGHT = 0F
+    const val OVERFLOW_X_OFFSET = 0F
+    const val OVERFLOW_Y_OFFSET = 0F
+    const val OVERFLOW_WIDTH = 0F
+    const val OVERFLOW_HEIGHT = 0F
 
     // STROKES
     val SOLID: PathEffect? = null
@@ -146,7 +145,7 @@ object DependencyPainter {
     val DASHED: PathEffect = DashPathEffect(floatArrayOf(5.0f, 5.0f), 0f)
 
     val EDGE_STROKE: PathEffect? = SOLID
-    val OVERFLOW_STROKE_WIDTH = 1F
+    const val OVERFLOW_STROKE_WIDTH = 1F
     val OVERFLOW_STROKE: PathEffect = DashPathEffect(floatArrayOf(20f, 10f, 5f, 10f), 0f)
     val HANDLE_STROKE: PathEffect? = SOLID
     val AXIS_STROKE: PathEffect? = SOLID

@@ -95,10 +95,6 @@ class AnchorAllocator {
         return getAnchor(node, edge)
     }
 
-    /*
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
     override fun toString(): String {
         val sb = StringBuilder()
         sb.append(this.anchors.keys)

@@ -7,7 +7,7 @@ import com.bbou.brats.AnnotationType
 import grammarscope.document.Document
 
 class DependencyRenderer(
-    val textView: TextView,
+    textView: TextView,
     val renderAsCurves: Boolean
 ) : IRenderer {
 
@@ -21,7 +21,7 @@ class DependencyRenderer(
      */
     internal lateinit var annotations: Map<AnnotationType, Collection<Annotation>>
 
-    override fun layout(document: Document, textView: TextView): Int {
+    override fun annotate(document: Document, textView: TextView): Int {
         val (annotations, height) = DependencyAnnotator(textView, renderAsCurves).annotate(document)!!
         this.annotations = annotations
         return height

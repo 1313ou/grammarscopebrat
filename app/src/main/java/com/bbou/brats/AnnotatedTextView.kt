@@ -46,17 +46,17 @@ class AnnotatedTextView @JvmOverloads constructor(
 
     fun annotate() {
         // renderer
-        val (annotations, height) = DependencyAnnotator(this, true).annotate(document)!!
+        val (annotations, _) = DependencyAnnotator(this, true).annotate(document)!!
         this.annotations = annotations
     }
 
-    override fun requestLayout() {
-        super.requestLayout()
-    }
+    // override fun requestLayout() {
+    //     super.requestLayout()
+    // }
 
-    override fun invalidate() {
-        super.invalidate()
-    }
+    // override fun invalidate() {
+    //     super.invalidate()
+    // }
 
     override fun onDraw(canvas: Canvas) {
 
@@ -200,6 +200,17 @@ class AnnotatedTextView @JvmOverloads constructor(
         )
         text = spannable
     }
+}
+
+/**
+ * Helper method to find a word's position in text
+ */
+private fun findWordPosition(text: String, word: String): Pair<Int, Int>? {
+    val index = text.indexOf(word)
+    if (index != -1) {
+        return Pair(index, index + word.length)
+    }
+    return null
 }
 
 /**

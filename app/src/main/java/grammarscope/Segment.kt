@@ -51,10 +51,6 @@ data class Segment(
         return text.substring(this.from - offset, this.to - offset)
     }
 
-    /*
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
     override fun toString(): String {
         return "[$from-$to]"
     }

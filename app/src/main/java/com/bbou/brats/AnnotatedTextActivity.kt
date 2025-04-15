@@ -2,13 +2,10 @@ package com.bbou.brats
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import grammarscope.DependencyAnnotator
 
 class AnnotatedTextActivity : AppCompatActivity() {
 
     lateinit var textView: AnnotatedTextView
-
-    lateinit var renderer: DependencyAnnotator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,16 +15,5 @@ class AnnotatedTextActivity : AppCompatActivity() {
         textView.post {
             textView.prepare()
         }
-    }
-
-    /**
-     * Helper method to find a word's position in text
-     */
-    private fun findWordPosition(text: String, word: String): Pair<Int, Int>? {
-        val index = text.indexOf(word)
-        if (index != -1) {
-            return Pair(index, index + word.length)
-        }
-        return null
     }
 }

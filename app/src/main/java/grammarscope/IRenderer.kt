@@ -17,7 +17,7 @@ interface IRenderer {
      * @param textComponent text component
      * @return used pad height
      */
-    fun layout(
+    fun annotate(
         document: Document,
         textComponent: TextView,
     ): Int

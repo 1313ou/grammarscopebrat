@@ -3,11 +3,8 @@ package com.bbou.brats
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.RectF
-import android.widget.TextView
 import grammarscope.Edge
-import grammarscope.IRenderer
 
 // Sealed class for different types of between-lines annotations
 
