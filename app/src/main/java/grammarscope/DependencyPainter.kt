@@ -11,7 +11,7 @@ import androidx.core.graphics.toColorInt
 import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
 
-object SemanticGraphPainter {
+object DependencyPainter {
 
     fun paintBoxes(g: Canvas, boxAnnotations: Collection<BoxAnnotation>) {
         for (boxAnnotation in boxAnnotations) {

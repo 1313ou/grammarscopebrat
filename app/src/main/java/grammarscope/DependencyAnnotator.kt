@@ -26,7 +26,7 @@ import grammarscope.document.GraphNode
  *
  * @author Bernard Bou
  */
-class SemanticGraphRenderer(
+class DependencyAnnotator(
     val textView: TextView,
     val renderAsCurves: Boolean
 ) {

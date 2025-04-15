@@ -6,7 +6,7 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.RectF
 import android.graphics.Typeface
-import grammarscope.SemanticGraphRenderer.Companion.height
+import grammarscope.DependencyAnnotator.Companion.height
 import grammarscope.Utils.drawDot
 import grammarscope.Utils.drawTriangle
 import java.lang.Math.toDegrees

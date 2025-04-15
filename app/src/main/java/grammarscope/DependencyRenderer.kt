@@ -6,7 +6,7 @@ import com.bbou.brats.Annotation
 import com.bbou.brats.AnnotationType
 import grammarscope.document.Document
 
-class Renderer(
+class DependencyRenderer(
     val textView: TextView,
     val renderAsCurves: Boolean
 ) : IRenderer {
@@ -22,13 +22,13 @@ class Renderer(
     internal lateinit var annotations: Map<AnnotationType, Collection<Annotation>>
 
     override fun layout(document: Document, textView: TextView): Int {
-        val (annotations, height) = SemanticGraphRenderer(textView, renderAsCurves).annotate(document)!!
+        val (annotations, height) = DependencyAnnotator(textView, renderAsCurves).annotate(document)!!
         this.annotations = annotations
         return height
     }
 
     override fun paint(canvas: Canvas) {
-        SemanticGraphPainter.paintBoxes(canvas, this.annotations[AnnotationType.BOX] as Collection<Annotation.BoxAnnotation>)
-        SemanticGraphPainter.paintEdges(canvas, this.annotations[AnnotationType.EDGE] as Collection<Annotation.EdgeAnnotation>, this.padWidth, this.renderAsCurves)
+        DependencyPainter.paintBoxes(canvas, this.annotations[AnnotationType.BOX] as Collection<Annotation.BoxAnnotation>)
+        DependencyPainter.paintEdges(canvas, this.annotations[AnnotationType.EDGE] as Collection<Annotation.EdgeAnnotation>, this.padWidth, this.renderAsCurves)
     }
 }

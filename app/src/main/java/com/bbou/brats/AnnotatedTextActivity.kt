@@ -1,16 +1,14 @@
 package com.bbou.brats
 
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import grammarscope.SemanticGraphRenderer
-import grammarscope.document.SampleDocument
+import grammarscope.DependencyAnnotator
 
 class AnnotatedTextActivity : AppCompatActivity() {
 
     lateinit var textView: AnnotatedTextView
 
-    lateinit var renderer: SemanticGraphRenderer
+    lateinit var renderer: DependencyAnnotator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

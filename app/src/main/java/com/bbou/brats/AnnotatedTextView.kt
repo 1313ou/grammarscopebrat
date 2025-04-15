@@ -18,8 +18,8 @@ import androidx.core.graphics.toColorInt
 import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
 import grammarscope.Segment
-import grammarscope.SemanticGraphPainter
-import grammarscope.SemanticGraphRenderer
+import grammarscope.DependencyPainter
+import grammarscope.DependencyAnnotator
 import grammarscope.document.SampleDocument
 import kotlin.math.max
 
@@ -46,7 +46,7 @@ class AnnotatedTextView @JvmOverloads constructor(
 
     fun annotate() {
         // renderer
-        val (annotations, height) = SemanticGraphRenderer(this, true).annotate(document)!!
+        val (annotations, height) = DependencyAnnotator(this, true).annotate(document)!!
         this.annotations = annotations
     }
 
@@ -76,10 +76,10 @@ class AnnotatedTextView @JvmOverloads constructor(
             // }
 
             val boxAnnotations = annotations[AnnotationType.BOX]!!.map { it as BoxAnnotation }
-            SemanticGraphPainter.paintBoxes(canvas, boxAnnotations)
+            DependencyPainter.paintBoxes(canvas, boxAnnotations)
 
             val edgeAnnotations = annotations[AnnotationType.EDGE]!!.map { it as EdgeAnnotation }
-            SemanticGraphPainter.paintEdges(canvas, edgeAnnotations, padWidth = width, renderAsCurves = true)
+            DependencyPainter.paintEdges(canvas, edgeAnnotations, padWidth = width, renderAsCurves = true)
         }
     }
 
