@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TransparentFab" parent="Widget.Design.FloatingActionButton">
+        <item name="backgroundTint">@android:color/transparent</item>
+        <!-- <item name="rippleColor">@android:color/transparent</item> -->
+        <item name="elevation">0dp</item>
+        <item name="borderWidth">0dp</item>
+    </style>
+
+</resources>
