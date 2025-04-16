@@ -22,7 +22,7 @@ class DependencyRenderer(
     internal lateinit var annotations: Map<AnnotationType, Collection<Annotation>>
 
     override fun annotate(document: Document, textView: TextView): Int {
-        val (annotations, height) = DependencyAnnotator(textView, renderAsCurves).annotate(document)!!
+        val (annotations, height) = DependencyAnnotator(textView).annotate(document)!!
         this.annotations = annotations
         return height
     }

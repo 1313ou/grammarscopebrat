@@ -66,7 +66,7 @@ object DependencyPainter {
         // draw labels
         for (edgeAnnotation in edgeAnnotations) {
             if (edgeAnnotation.edge.isVisible) {
-                edgeAnnotation.edge.drawLabel(g)
+                edgeAnnotation.edge.drawTag(g)
             }
         }
     }

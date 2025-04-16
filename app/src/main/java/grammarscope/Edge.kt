@@ -12,6 +12,7 @@ import grammarscope.Utils.drawTriangle
 import java.lang.Math.toDegrees
 import kotlin.math.atan2
 import kotlin.math.min
+import androidx.core.graphics.withSave
 
 /**
  * Edge as used by renderer
@@ -105,7 +106,7 @@ data class Edge
     /**
      * Edge color
      */
-    val color: Int,
+    val edgeColor: Int?,
 ) {
     // P O S I T I O N   A N D   L A Y O U T
 
@@ -118,60 +119,31 @@ data class Edge
     // D R A W
 
     /**
-     * Draw label
-     *
-     * @param g graphics context
-     */
-    fun drawLabel(g: Canvas) {
-        // tag background
-        val paint = Paint().apply {
-            style = Paint.Style.FILL
-            color = Color.YELLOW
-        }
-        g.drawRect(tagRectangle.left, tagRectangle.top, tagRectangle.right, tagRectangle.bottom, paint)
-
-        // tag text
-        val textPaint = Paint().apply {
-            typeface = tagFont
-            color = Color.BLUE // labelColor
-            textSize = 30F
-        }
-        if (isVertical) {
-            val saveCount = g.save()
-            try {
-                g.rotate(180f, tagPosition.x.toFloat(), tagPosition.y.toFloat())
-                g.drawText(tag, tagPosition.x.toFloat(), tagPosition.y.toFloat(), textPaint)
-            } finally {
-                g.restoreToCount(saveCount)
-            }
-        } else g.drawText(tag, tagPosition.x.toFloat(), tagPosition.y.toFloat(), textPaint)
-    }
-
-    /**
      * Draw edge
      *
-     * @param g      graphics context
+     * @param canvas      graphics context
      * @param asCurve whether to draw edge as curve (or straight arrow)
      */
-    fun draw(g: Canvas, asCurve: Boolean) {
+    fun draw(canvas: Canvas, asCurve: Boolean) {
         if (asCurve) {
-            drawCurvePath(g)
+            drawCurvePath(canvas)
         } else {
-            drawStraightArrow(g)
+            drawStraightArrow(canvas)
         }
     }
 
     /**
      * Draw edge as curve
      *
-     * @param g graphics context
+     * @param canvas canvas
      */
-    private fun drawCurvePath(g: Canvas) {
+    private fun drawCurvePath(canvas: Canvas) {
         // edge
         val paint = Paint().apply {
-            color = edgeColor
+            color = edgeColor ?: unspecifiedEdgeColor
             style = Paint.Style.STROKE
             strokeWidth = EDGE_STROKE
+            isAntiAlias = true
         }
         val xTextFrom = tagRectangle.left
         val xTextTo = tagRectangle.left + tagRectangle.width()
@@ -185,14 +157,14 @@ data class Edge
 
         // curve
         val shape = CurvePath(xFrom, xTo, xTextFrom, xTextTo, yFrom, yTo, yText, flatLeft, flatRight)
-        g.drawPath(shape, paint)
+        canvas.drawPath(shape, paint)
 
         // control
-        // val cox1 = (int) shape.getXCornerRight()
-        // val cox2 = (int) shape.getXCornerLeft()
-        val ctx1 = shape.xControlRight.toInt()
-        val ctx2 = shape.xControlLeft.toInt()
-        val cty = shape.yBase.toInt()
+        // val cox1 = shape.xCornerRight
+        // val cox2 = shape.xCornerLeft
+        val ctx1 = shape.xControlRight
+        val ctx2 = shape.xControlLeft
+        val cty = shape.yBase
 
         // arrow tip at corner
         if (isRightTerminal && !isBackwards) {
@@ -204,18 +176,18 @@ data class Edge
             val paint = Paint().apply {
                 color = arrowTipColor
             }
-            g.drawTriangle(xTo, yTo, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = false, rotation = theta.toFloat(), paint)
+            canvas.drawTriangle(xTo, yTo, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = false, rotation = theta.toFloat(), paint)
 
         } else if (isLeftTerminal && isBackwards) {
-            // val xc = (int) shape.getXCornerLeft()
+            // val xc = shape.xCornerLeft
             // val yc = yText
-            // g.drawTriangle(ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, true)
+            // canvas.drawTriangle(ARROW_COLOR, xc, yc, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, true)
             // val theta = toDegrees(atan2((double)yc - y, (double)xc - x)) // corner
             val theta = toDegrees(atan2(cty.toDouble() - yFrom, ctx2.toDouble() - xFrom))
             val paint = Paint().apply {
                 color = arrowTipColor
             }
-            g.drawTriangle(xFrom, yFrom, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = true, rotation = theta.toFloat(), paint)
+            canvas.drawTriangle(xFrom, yFrom, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, reverse = true, rotation = theta.toFloat(), paint)
         }
 
         // g.drawDot(Color.RED, cox1, cty, 1)
@@ -227,16 +199,16 @@ data class Edge
     /**
      * Draw edge as straight arrow
      *
-     * @param g graphics context
+     * @param canvas canvas
      */
-    private fun drawStraightArrow(g: Canvas) {
+    private fun drawStraightArrow(canvas: Canvas) {
         // edge
         val paint = Paint().apply {
-            color = edgeColor
+            color = edgeColor ?: unspecifiedEdgeColor
             style = Paint.Style.STROKE
-            strokeWidth = 2F //EDGE_STROKE
+            strokeWidth = 2F
         }
-        g.drawLine(x1, yBase, x2 - 1F, yBase, paint)
+        canvas.drawLine(x1, yBase, x2 - 1F, yBase, paint)
 
         // arrow tip
         val drawArrowEnd = if (isBackwards) isLeftTerminal else isRightTerminal
@@ -245,7 +217,7 @@ data class Edge
             val paint = Paint().apply {
                 color = arrowTipColor
             }
-            g.drawTriangle(xTip, yBase, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, isBackwards, paint)
+            canvas.drawTriangle(xTip, yBase, ARROW_TIP_WIDTH, ARROW_TIP_HEIGHT, isBackwards, paint)
         }
 
         // arrow start
@@ -255,8 +227,36 @@ data class Edge
             val paint = Paint().apply {
                 color = arrowStartColor
             }
-            g.drawDot(xTip, yBase, ARROW_START_DIAMETER, paint)
+            canvas.drawDot(xTip, yBase, ARROW_START_DIAMETER, paint)
         }
+    }
+
+    /**
+     * Draw tag
+     *
+     * @param canvas canvas
+     */
+    fun drawTag(canvas: Canvas) {
+        // tag background
+        val paint = Paint().apply {
+            style = Paint.Style.FILL
+            color = tagBackColor
+        }
+        canvas.drawRect(tagRectangle.left, tagRectangle.top, tagRectangle.right, tagRectangle.bottom, paint)
+
+        // tag text
+        val textPaint = Paint().apply {
+            typeface = tagTypeFace
+            color = tagColor
+            textSize = tagTextSize
+            isAntiAlias = true
+        }
+        if (isVertical) {
+            canvas.withSave {
+                rotate(180f, tagPosition.x.toFloat(), tagPosition.y.toFloat())
+                drawText(tag, tagPosition.x.toFloat(), tagPosition.y.toFloat(), textPaint)
+            }
+        } else canvas.drawText(tag, tagPosition.x.toFloat(), tagPosition.y.toFloat(), textPaint)
     }
 
     override fun toString(): String {
@@ -264,34 +264,31 @@ data class Edge
     }
 
     companion object {
-        var tagFont: Typeface = Typeface.SANS_SERIF
 
         const val ARROW_TIP_WIDTH = 15F
         const val ARROW_TIP_HEIGHT = 15F
         const val ARROW_START_DIAMETER = 10F
-        const val EDGE_STROKE = 5F
 
+        const val EDGE_STROKE = 3F
+
+        val DEFAULT_LABEL_TYPEFACE: Typeface = Typeface.SANS_SERIF
+        const val DEFAULT_TAG_TEXT_SIZE = 40F
         const val LABEL_BOTTOM_INSET = 10F
         const val LABEL_INFLATE = 1F
 
         const val DEFAULT_EDGE_COLOR: Int = Color.DKGRAY
-        const val DEFAULT_LABEL_COLOR: Int = Color.DKGRAY
         const val DEFAULT_ARROW_TIP_COLOR: Int = Color.DKGRAY
         const val DEFAULT_ARROW_START_COLOR: Int = Color.GRAY
+        const val DEFAULT_TAG_COLOR: Int = Color.DKGRAY
+        const val DEFAULT_TAG_BACKCOLOR: Int = Color.WHITE
 
-        var labelColor = Color.RED
-        var edgeColor = Color.RED
-        var arrowTipColor = Color.RED
-        var arrowStartColor = Color.RED
-
-        /**
-         * Set label color
-         *
-         * @param color color
-         */
-        fun setLabelColor(color: Int?) {
-            labelColor = color ?: DEFAULT_LABEL_COLOR
-        }
+        var unspecifiedEdgeColor = DEFAULT_EDGE_COLOR
+        var arrowTipColor = DEFAULT_ARROW_TIP_COLOR
+        var arrowStartColor = DEFAULT_ARROW_START_COLOR
+        var tagTypeFace = DEFAULT_LABEL_TYPEFACE
+        var tagTextSize = DEFAULT_TAG_TEXT_SIZE
+        var tagColor = DEFAULT_TAG_COLOR
+        var tagBackColor = DEFAULT_TAG_BACKCOLOR
 
         /**
          * Set edge color
@@ -299,27 +296,33 @@ data class Edge
          * @param color color
          */
         fun setEdgeColor(color: Int?) {
-            edgeColor = color ?: DEFAULT_EDGE_COLOR
-        }
-
-        /**
-         * Set arrow tip color
-         *
-         * @param color color
-         */
-        fun setArrowTipColor(color: Int?) {
+            unspecifiedEdgeColor = color ?: DEFAULT_EDGE_COLOR
             arrowTipColor = color ?: DEFAULT_ARROW_TIP_COLOR
-        }
-
-        /**
-         * Set arrow start color
-         *
-         * @param color color
-         */
-        fun setArrowStartColor(color: Int?) {
             arrowStartColor = color ?: DEFAULT_ARROW_START_COLOR
         }
 
+        /**
+         * Set label color
+         *
+         * @param color color
+         */
+        fun setLabelColor(color: Int?) {
+            tagColor = color ?: DEFAULT_TAG_COLOR
+        }
+
+        /**
+         * Compute tag
+         *
+         * @param tag edge tag
+         * @param isVertical
+         * @param x1 from
+         * @param x1Anchor from anchor
+         * @param x2 to
+         * @param x2Anchor to anchor
+         * @param yBase edge base
+         * @param tagPaint paint
+         * @return tag position, width, rectangle
+         */
         fun computeTag(tag: String, isVertical: Boolean, x1: Float, x1Anchor: Float, x2: Float, x2Anchor: Float, yBase: Float, tagPaint: Paint): Triple<PointF, Float, RectF> {
             if (isVertical) {
 
@@ -433,6 +436,8 @@ data class Edge
             )
             return edge
         }
+
+        // T R U N C A T E   T A G
 
         /**
          * Truncate margin

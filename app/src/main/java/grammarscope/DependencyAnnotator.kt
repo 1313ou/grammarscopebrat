@@ -1,5 +1,6 @@
 package grammarscope
 
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.FontMetrics
 import android.graphics.Rect
@@ -22,20 +23,17 @@ import grammarscope.document.GraphNode
  * Semantic graph renderer
  *
  * @param textView textView
- * @param renderAsCurves  whether to render edges as curves
  *
  * @author Bernard Bou
  */
 class DependencyAnnotator(
     val textView: TextView,
-    val renderAsCurves: Boolean
 ) {
 
     /**
      * Height
      */
     var height: Int = textView.height - textView.paddingTop - textView.paddingBottom
-
 
     /**
      * Top
@@ -50,7 +48,7 @@ class DependencyAnnotator(
     /**
      * Paint for tag
      */
-    private val tagPaint: Paint = Paint().apply { textSize = 30F }
+    private val tagPaint: Paint = Paint().apply { textSize = Edge.tagTextSize }
 
     /**
      * Metrics for tag
@@ -60,7 +58,7 @@ class DependencyAnnotator(
     /**
      * Relation palette
      */
-    private var relationPalette: (GraphEdge) -> Int = { e -> "#FF0000".toColorInt() }
+    private var relationPalette: (GraphEdge) -> Int = { e -> Color.DKGRAY }
 
     // L A Y O U T
 
@@ -284,6 +282,6 @@ class DependencyAnnotator(
 
         private const val X_MARGIN = 40
 
-        private const val X_SHIFT = 7
+        private const val X_SHIFT = 20
     }
 }

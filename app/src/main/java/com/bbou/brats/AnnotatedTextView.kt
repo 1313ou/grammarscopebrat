@@ -46,7 +46,7 @@ class AnnotatedTextView @JvmOverloads constructor(
 
     fun annotate() {
         // renderer
-        val (annotations, _) = DependencyAnnotator(this, true).annotate(document)!!
+        val (annotations, _) = DependencyAnnotator(this).annotate(document)!!
         this.annotations = annotations
     }
 
