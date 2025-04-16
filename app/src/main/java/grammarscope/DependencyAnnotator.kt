@@ -60,16 +60,6 @@ class DependencyAnnotator(
      */
     private var relationPalette: (GraphEdge) -> Int = { e -> Color.DKGRAY }
 
-    // L A Y O U T
-
-    private fun dumpLines() {
-        for (line in 0..textView.layout.lineCount) {
-            var r = Rect()
-            textView.layout.getLineBounds(line, r)
-            println("$line $r")
-        }
-    }
-
     /*
     topOffset
     label top inset
@@ -254,6 +244,14 @@ class DependencyAnnotator(
             break
         }
         return mapOf(AnnotationType.EDGE to edges, AnnotationType.BOX to boxes) to this.height
+    }
+
+    private fun dumpLines() {
+        for (line in 0..textView.layout.lineCount) {
+            var r = Rect()
+            textView.layout.getLineBounds(line, r)
+            println("$line $r")
+        }
     }
 
     companion object {
