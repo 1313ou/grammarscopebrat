@@ -14,26 +14,26 @@ import android.graphics.PointF
  * cubicTo(x1, y1, x2, y2, x3, y3) : Bezier curve to (x3,y3), using the control points (x1,y1) and (x2,y2)
  * @author Bernard Bou
  */
-class CurlyBracePath(xFrom: Int, xTo: Int, xMid: Int, y: Int, down: Boolean) : Path() {
+class CurlyBracePath(xFrom: Float, xTo: Float, xMid: Float, y: Float, down: Boolean) : Path() {
 
     init {
-        val yTop: Int = y - CURLY_HEIGHT
+        val yTop = y - CURLY_HEIGHT
         val yBase = if (down) yTop else y
         val yTip = if (down) y else yTop
 
         // end points for first curve
-        val p1 = PointF(xFrom.toFloat(), yBase.toFloat())
-        val pm = PointF(xMid.toFloat(), yTip.toFloat())
+        val p1 = PointF(xFrom, yBase)
+        val pm = PointF(xMid, yTip)
 
         // end points for second curve
-        val p2 = PointF(xTo.toFloat(), yBase.toFloat())
+        val p2 = PointF(xTo, yBase)
 
         // control points for first curve
-        val c1 = PointF(xFrom.toFloat(), yTip.toFloat())
-        val cm = PointF(xMid.toFloat(), yBase.toFloat())
+        val c1 = PointF(xFrom, yTip)
+        val cm = PointF(xMid, yBase)
 
         // control points for second curve
-        val c2 = PointF(xTo.toFloat(), yTip.toFloat())
+        val c2 = PointF(xTo, yTip)
 
         // define path
         moveTo(p1.x, p1.y)

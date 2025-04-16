@@ -20,7 +20,7 @@ object DependencyPainter {
         }
     }
 
-    fun paintEdges(g: Canvas, edgeAnnotations: Collection<EdgeAnnotation>, padWidth: Int, renderAsCurves: Boolean) {
+    fun paintEdges(g: Canvas, edgeAnnotations: Collection<EdgeAnnotation>, padWidth: Float, renderAsCurves: Boolean) {
 
          val overflowPaint = Paint().apply {
             color = DEFAULT_OVERFLOW_COLOR
@@ -29,11 +29,11 @@ object DependencyPainter {
             pathEffect = OVERFLOW_STROKE
         }
 
-        val handlePaint = Paint().apply {
+        val overflowHandlePaint = Paint().apply {
             color = DEFAULT_OVERFLOW_COLOR
             style = Paint.Style.STROKE
             strokeWidth = OVERFLOW_STROKE_WIDTH
-            pathEffect = HANDLE_STROKE
+            pathEffect = OVERFLOW_HANDLE_STROKE
         }
 
         for (edgeAnnotation in edgeAnnotations) {
@@ -44,11 +44,11 @@ object DependencyPainter {
                 edge.draw(g, renderAsCurves)
             } else {
 
-                // can't fit in
+                // can't fit in / overflow
                 var y: Float = edge.bottom - 1F
 
                 // line
-                g.drawLine(0f, y.toFloat(), padWidth.toFloat(), y.toFloat(), overflowPaint)
+                g.drawLine(0f, y, padWidth, y, overflowPaint)
 
                 // handle
                 y -= OVERFLOW_Y_OFFSET
@@ -59,7 +59,7 @@ object DependencyPainter {
                     lineTo(x + OVERFLOW_WIDTH, y - OVERFLOW_HEIGHT)
                     close()
                 }
-                g.drawPath(path, handlePaint)
+                g.drawPath(path, overflowHandlePaint)
             }
         }
 
@@ -78,20 +78,20 @@ object DependencyPainter {
      * @param box box for typed dependency node
      */
     private fun drawBox(g: Canvas, box: RectF) {
-        val boxL = box.left.toInt()
-        val boxT = box.top.toInt()
-        val boxH = box.height().toInt()
-        val boxW = box.width().toInt()
+        val boxL = box.left
+        val boxT = box.top
+        val boxH = box.height()
+        val boxW = box.width()
         val boxR = boxL + boxW
         val boxB = boxT + boxH
-        val boxM = boxL + boxW / 2
+        val boxM = boxL + boxW / 2F
 
         // draw axis
         val axisPaint = Paint().apply {
             color = axisColor
             pathEffect = AXIS_STROKE
         }
-        g.drawLine(boxM.toFloat(), boxT.toFloat(), boxM.toFloat(), boxB.toFloat(), axisPaint)
+        g.drawLine(boxM, boxT, boxM, boxB, axisPaint)
 
         // draw span lines
         val spanPaint = Paint().apply {
@@ -134,10 +134,10 @@ object DependencyPainter {
     const val DEFAULT_AXIS_COLOR: Int = Color.WHITE
     const val DEFAULT_OVERFLOW_COLOR: Int = Color.GRAY
 
-    const val OVERFLOW_X_OFFSET = 0F
-    const val OVERFLOW_Y_OFFSET = 0F
-    const val OVERFLOW_WIDTH = 0F
-    const val OVERFLOW_HEIGHT = 0F
+    const val OVERFLOW_X_OFFSET = 50F
+    const val OVERFLOW_Y_OFFSET = 10F
+    const val OVERFLOW_WIDTH = 30F
+    const val OVERFLOW_HEIGHT = 30F
 
     // STROKES
     val SOLID: PathEffect? = null
@@ -145,9 +145,11 @@ object DependencyPainter {
     val DASHED: PathEffect = DashPathEffect(floatArrayOf(5.0f, 5.0f), 0f)
 
     val EDGE_STROKE: PathEffect? = SOLID
-    const val OVERFLOW_STROKE_WIDTH = 1F
-    val OVERFLOW_STROKE: PathEffect = DashPathEffect(floatArrayOf(20f, 10f, 5f, 10f), 0f)
-    val HANDLE_STROKE: PathEffect? = SOLID
+
+    const val OVERFLOW_STROKE_WIDTH = 8F
+    val OVERFLOW_STROKE: PathEffect = DashPathEffect(floatArrayOf(20f, 5f, 5f, 5f), 0f)
+    val OVERFLOW_HANDLE_STROKE: PathEffect? = SOLID
+
     val AXIS_STROKE: PathEffect? = SOLID
     val SPAN_STROKE: PathEffect? = SOLID
 }

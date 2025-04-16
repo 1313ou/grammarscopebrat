@@ -79,7 +79,7 @@ class AnnotatedTextView @JvmOverloads constructor(
             DependencyPainter.paintBoxes(canvas, boxAnnotations)
 
             val edgeAnnotations = annotations[AnnotationType.EDGE]!!.map { it as EdgeAnnotation }
-            DependencyPainter.paintEdges(canvas, edgeAnnotations, padWidth = width, renderAsCurves = true)
+            DependencyPainter.paintEdges(canvas, edgeAnnotations, padWidth = width.toFloat(), renderAsCurves = true)
         }
     }
 

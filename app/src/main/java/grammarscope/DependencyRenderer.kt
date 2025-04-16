@@ -29,6 +29,6 @@ class DependencyRenderer(
 
     override fun paint(canvas: Canvas) {
         DependencyPainter.paintBoxes(canvas, this.annotations[AnnotationType.BOX] as Collection<Annotation.BoxAnnotation>)
-        DependencyPainter.paintEdges(canvas, this.annotations[AnnotationType.EDGE] as Collection<Annotation.EdgeAnnotation>, this.padWidth, this.renderAsCurves)
+        DependencyPainter.paintEdges(canvas, this.annotations[AnnotationType.EDGE] as Collection<Annotation.EdgeAnnotation>, this.padWidth.toFloat(), this.renderAsCurves)
     }
 }
