@@ -12,6 +12,7 @@ import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
 import com.bbou.brats.AnnotationType
 import com.bbou.brats.modelToView
+import com.bbou.brats.modelToViewF
 import grammarscope.Edge.Companion.makeEdge
 import grammarscope.allocator.Allocator
 import grammarscope.document.Document
@@ -109,14 +110,14 @@ class DependencyAnnotator(
 
                 // location
                 val segment = node.segment
-                val rectangle: Rect = textView.modelToView(segment)
+                val rectangle = textView.modelToViewF(segment)
 
                 // val boxL = rectangle.left
-                // val boxT: Float = rectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
-                // val boxH: Float = padHeight - PAD_TOP_INSET
+                // val boxT = rectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
+                // val boxH = padHeight - PAD_TOP_INSET
                 // val boxW = rectangle.width()
-                // val box = RectF(boxL.toFloat(), boxT, boxW.toFloat(), boxH)
-                val box = RectF(rectangle)
+                // val box = RectF(boxL, boxT, boxW, boxH)
+                val box = rectangle
                 boxes.add(BoxAnnotation(box))
             }
 
@@ -140,8 +141,8 @@ class DependencyAnnotator(
                 val rightSegment = if (isBackwards) fromWord else toWord
 
                 // location
-                val leftRectangle: Rect = textView.modelToView(leftSegment)
-                val rightRectangle: Rect = textView.modelToView(rightSegment)
+                val leftRectangle = textView.modelToViewF(leftSegment)
+                val rightRectangle = textView.modelToViewF(rightSegment)
 
                 // data
                 val label: String? = gEdge.label
@@ -193,10 +194,7 @@ class DependencyAnnotator(
                         currentSegmentIndex++
 
                         // if is not visible
-                        val rectangle: Rect? = textView.modelToView(segment)
-                        if (rectangle == null) {
-                            continue
-                        }
+                        val rectangle = textView.modelToViewF(segment)
 
                         // if line skipped (the current segment is on the current line)
                         if (rectangle.top != y) {
@@ -209,11 +207,11 @@ class DependencyAnnotator(
                             val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
-                            val edge: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = false, isVisible, color, tagPaint = tagPaint)
+                            val edge: Edge = makeEdge(xEdge1, xEdge2, yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = false, isVisible, color, tagPaint = tagPaint)
                             edges.add(EdgeAnnotation(edge))
 
                             // move ahead cursor1
-                            val rectangle2: Rect = textView.modelToView(segment.from)
+                            val rectangle2 = textView.modelToViewF(segment.from)
                             xLeft = rectangle2.left
                             xLeftOfs = rectangle2.width() / 2
                             y = rectangle2.top
@@ -235,7 +233,7 @@ class DependencyAnnotator(
                             val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
                             val bottom = y + lineHeight + padTopOffset + padHeight
 
-                            val edge: Edge = makeEdge(xEdge1.toFloat(), xEdge2.toFloat(), yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = true, isVisible, color, tagPaint = tagPaint)
+                            val edge: Edge = makeEdge(xEdge1, xEdge2, yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = true, isVisible, color, tagPaint = tagPaint)
                             edges.add(EdgeAnnotation(edge))
                         }
                     }

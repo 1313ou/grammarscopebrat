@@ -253,10 +253,10 @@ data class Edge
         }
         if (isVertical) {
             canvas.withSave {
-                rotate(180f, tagPosition.x.toFloat(), tagPosition.y.toFloat())
-                drawText(tag, tagPosition.x.toFloat(), tagPosition.y.toFloat(), textPaint)
+                rotate(180f, tagPosition.x, tagPosition.y)
+                drawText(tag, tagPosition.x, tagPosition.y, textPaint)
             }
-        } else canvas.drawText(tag, tagPosition.x.toFloat(), tagPosition.y.toFloat(), textPaint)
+        } else canvas.drawText(tag, tagPosition.x, tagPosition.y, textPaint)
     }
 
     override fun toString(): String {

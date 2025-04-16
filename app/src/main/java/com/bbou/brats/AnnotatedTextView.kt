@@ -251,13 +251,30 @@ fun TextView.getWordPosition(wordStart: Int, wordEnd: Int): Rect? {
  */
 fun TextView.modelToView(segment: Segment): Rect {
 
-    val fromRectangle: Rect = modelToView(segment.from)
-    val toRectangle: Rect = modelToView(segment.to)
-    val left = fromRectangle.left.toInt()
-    val top = fromRectangle.top.toInt()
-    val right = toRectangle.right.toInt()
+    val fromRectangle = modelToView(segment.from)
+    val toRectangle = modelToView(segment.to)
+    val left = fromRectangle.left
+    val top = fromRectangle.top
+    val right = toRectangle.right
     val bottom = max(fromRectangle.bottom, toRectangle.bottom)
     return Rect(left, top, right, bottom)
+}
+
+/**
+ * Get rectangle for segment in text
+ *
+ * @param segment       target segment
+ * @return rectangle
+ */
+fun TextView.modelToViewF(segment: Segment): RectF {
+
+    val fromRectangle = modelToViewF(segment.from)
+    val toRectangle = modelToViewF(segment.to)
+    val left = fromRectangle.left
+    val top = fromRectangle.top
+    val right = toRectangle.right
+    val bottom = max(fromRectangle.bottom, toRectangle.bottom)
+    return RectF(left, top, right, bottom)
 }
 
 fun TextView.modelToView(pos: Int): Rect {
@@ -266,12 +283,12 @@ fun TextView.modelToView(pos: Int): Rect {
     }
     val metrics: FontMetrics = paint.fontMetrics
     val layout: Layout = layout
-    val line: Int = layout.getLineForOffset(pos)
-    val baseline: Int = layout.getLineBaseline(line)
+    val line = layout.getLineForOffset(pos)
+    val baseline = layout.getLineBaseline(line)
     val top = baseline + metrics.ascent + paddingTop //layout.getLineTop(line)
     val bottom = baseline + metrics.descent + paddingTop // layout.getLineBottom(line)
-    val x: Float = layout.getPrimaryHorizontal(pos)
-    val width: Float = if (pos < text.length) {
+    val x = layout.getPrimaryHorizontal(pos)
+    val width = if (pos < text.length) {
         layout.getPrimaryHorizontal(pos + 1) - x
     } else {
         // Handle the end of the text.
@@ -285,8 +302,38 @@ fun TextView.modelToView(pos: Int): Rect {
             0F
         }
     }
-    val left = x.toInt() + paddingLeft
-    val right = (left + width).toInt()
-    return Rect(left, top.toInt(), right, bottom.toInt())
+    val left = x + paddingLeft
+    val right = left + width
+    return Rect(left.toInt(), top.toInt(), right.toInt(), bottom.toInt())
 }
 
+
+fun TextView.modelToViewF(pos: Int): RectF {
+    if (pos < 0 || pos > text.length) {
+        return throw IllegalArgumentException("Invalid position: $pos")
+    }
+    val metrics: FontMetrics = paint.fontMetrics
+    val layout: Layout = layout
+    val line = layout.getLineForOffset(pos)
+    val baseline = layout.getLineBaseline(line)
+    val top = baseline + metrics.ascent + paddingTop //layout.getLineTop(line)
+    val bottom = baseline + metrics.descent + paddingTop // layout.getLineBottom(line)
+    val x = layout.getPrimaryHorizontal(pos)
+    val width = if (pos < text.length) {
+        layout.getPrimaryHorizontal(pos + 1) - x
+    } else {
+        // Handle the end of the text.
+        if (text.isNotEmpty()) {
+            // Get the previous character position.
+            val previousPos = pos - 1
+            val previousX = layout.getPrimaryHorizontal(previousPos)
+            x - previousX
+        } else {
+            // Handle empty text.
+            0F
+        }
+    }
+    val left = x + paddingLeft
+    val right = left + width
+    return RectF(left, top, right, bottom)
+}
