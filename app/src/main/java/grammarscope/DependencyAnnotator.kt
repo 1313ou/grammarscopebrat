@@ -62,7 +62,7 @@ class DependencyAnnotator(
     private var relationPalette: (label: String?) -> Int = { e -> Color.DKGRAY }
     private val random = Random.Default
     private var relationPalette2: (label: String?) -> Int = {
-        Color.rgb(random.nextInt(), random.nextInt(), random.nextInt())
+        Color.argb(0x40, random.nextInt(255), random.nextInt(255), random.nextInt(255))
     }
 
     fun annotate(
