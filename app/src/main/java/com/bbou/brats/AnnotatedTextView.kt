@@ -17,9 +17,9 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.graphics.toColorInt
 import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
-import grammarscope.Segment
-import grammarscope.DependencyPainter
 import grammarscope.DependencyAnnotator
+import grammarscope.DependencyPainter
+import grammarscope.Segment
 import grammarscope.document.SampleDocument
 import kotlin.math.max
 
@@ -58,6 +58,13 @@ class AnnotatedTextView @JvmOverloads constructor(
     //     super.invalidate()
     // }
 
+    val hatchPaint = InterlacedHatchPaintBuilder().build(
+        angle = 45f,
+        spacing = 160f,
+        strokeWidth = 60f,
+        color = "#30000000".toColorInt(),
+    )
+
     override fun onDraw(canvas: Canvas) {
 
         // Draw text
@@ -67,6 +74,10 @@ class AnnotatedTextView @JvmOverloads constructor(
             dumpLineText()
             drawAnnotationSpace(canvas)
             drawLineSpace(canvas)
+
+            // hatch
+            //val rect = RectF(0f, 0f, 1000f, 1000f)
+            //canvas.drawRect(rect, hatchPaint)
 
             annotate()
 
@@ -94,11 +105,12 @@ class AnnotatedTextView @JvmOverloads constructor(
     }
 
     private fun drawAnnotationSpace(canvas: Canvas) {
-        val paintRect = Paint().apply {
-            color = "#FFffffb0".toColorInt()
-            strokeWidth = 2f
-            style = Paint.Style.FILL
-        }
+        val paintRect = hatchPaint
+        //   .apply {
+        //    color = "#FFffffb0".toColorInt()
+        //    strokeWidth = 2f
+        //    style = Paint.Style.FILL
+        //}
 
         val paint: Paint = this.paint
         val fontMetrics = paint.fontMetrics
