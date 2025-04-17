@@ -6,12 +6,10 @@ import android.graphics.Paint.FontMetrics
 import android.graphics.Rect
 import android.graphics.RectF
 import android.widget.TextView
-import androidx.core.graphics.toColorInt
 import com.bbou.brats.Annotation
 import com.bbou.brats.Annotation.BoxAnnotation
 import com.bbou.brats.Annotation.EdgeAnnotation
 import com.bbou.brats.AnnotationType
-import com.bbou.brats.modelToView
 import com.bbou.brats.modelToViewF
 import grammarscope.Edge.Companion.makeEdge
 import grammarscope.allocator.Allocator
@@ -34,22 +32,7 @@ class DependencyAnnotator(
     /**
      * Height
      */
-    var height: Int = textView.height - textView.paddingTop - textView.paddingBottom
-
-    /**
-     * Top
-     */
-    private val padTopOffset: Int = 5
-
-    /**
-     * Annotation pad width
-     */
-    private var padHeight = textView.lineSpacingExtra
-
-    /**
-     * Paint for tag
-     */
-    private val tagPaint: Paint = Paint().apply { textSize = Edge.tagTextSize }
+    private val height: Int = textView.height - textView.paddingTop - textView.paddingBottom
 
     /**
      * Metrics for tag
@@ -57,27 +40,24 @@ class DependencyAnnotator(
     private val lineHeight: Float = textView.paint.fontMetrics.height()
 
     /**
+     * Top
+     */
+    private val padTopOffset: Int = 35
+
+    /**
+     * Annotation pad width
+     */
+    private val padHeight = textView.lineSpacingExtra
+
+    /**
+     * Paint for tag
+     */
+    private val tagPaint: Paint = Paint().apply { textSize = Edge.tagTextSize }
+
+    /**
      * Relation palette
      */
     private var relationPalette: (GraphEdge) -> Int = { e -> Color.DKGRAY }
-
-    /*
-    topOffset
-    label top inset
-    label top inflate
-    tag height
-    label bottom inflate
-    label bottom
-
-    pad top = text bottom
-    pad top inset
-    edge tag
-    first edge base
-    ...
-    last edge base
-    pad bottom inset
-    pad bottom = pad height
-    */
 
     fun annotate(
         document: Document,
@@ -110,15 +90,13 @@ class DependencyAnnotator(
 
                 // location
                 val segment = node.segment
-                val rectangle = textView.modelToViewF(segment)
+                val wordBox = textView.modelToViewF(segment)
+                boxes.add(BoxAnnotation(wordBox))
 
-                // val boxL = rectangle.left
-                // val boxT = rectangle.top + lineHeight + padTopOffset + PAD_TOP_INSET
-                // val boxH = padHeight - PAD_TOP_INSET
-                // val boxW = rectangle.width()
-                // val box = RectF(boxL, boxT, boxW, boxH)
-                val box = rectangle
-                boxes.add(BoxAnnotation(box))
+                val annotationTop = wordBox.top + lineHeight
+                val annotationBottom = annotationTop + padHeight
+                val annotationBox = RectF(wordBox.left, annotationTop + padTopOffset + PAD_TOP_INSET, wordBox.right, annotationBottom - PAD_BOTTOM_INSET)
+                boxes.add(BoxAnnotation(annotationBox))
             }
 
             // EDGES
@@ -194,10 +172,10 @@ class DependencyAnnotator(
                         currentSegmentIndex++
 
                         // if is not visible
-                        val rectangle = textView.modelToViewF(segment)
+                        val textBox = textView.modelToViewF(segment)
 
                         // if line skipped (the current segment is on the current line)
-                        if (rectangle.top != y) {
+                        if (textBox.top != y) {
                             // line break before this segment
                             val xEdge1 = xLeft + xLeftOfs - (if (isFirst) 0 else X_MARGIN)
                             val xEdge2 = xRight + X_MARGIN
@@ -205,7 +183,7 @@ class DependencyAnnotator(
                             val xAnchor1 = (allocator.getLeftAnchor(gEdge) * X_SHIFT)
                             val xAnchor2 = (allocator.getRightAnchor(gEdge) * X_SHIFT)
                             val yAnchor: Float = y + lineHeight + padTopOffset + PAD_TOP_INSET
-                            val bottom = y + lineHeight + padTopOffset + padHeight
+                            val bottom = y + lineHeight + padHeight
 
                             val edge: Edge = makeEdge(xEdge1, xEdge2, yEdge, xAnchor1, xAnchor2, yAnchor, tagHeight, bottom, label, isBackwards, isLeftTerminal = isFirst, isRightTerminal = false, isVisible, color, tagPaint = tagPaint)
                             edges.add(EdgeAnnotation(edge))
@@ -219,8 +197,8 @@ class DependencyAnnotator(
                         }
 
                         // move ahead cursor2
-                        xRight = rectangle.left + rectangle.width()
-                        val xRightOfs = rectangle.width() / 2
+                        xRight = textBox.left + textBox.width()
+                        val xRightOfs = textBox.width() / 2
 
                         // finish it off if this is the last segment
                         if (currentSegmentIndex == lastSegmentIndex) {

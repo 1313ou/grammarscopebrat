@@ -66,7 +66,7 @@ class AnnotatedTextView @JvmOverloads constructor(
         if (text != "") {
             dumpLineText()
             drawAnnotationSpace(canvas)
-            //drawLineSpace(canvas)
+            drawLineSpace(canvas)
 
             annotate()
 
@@ -160,11 +160,11 @@ class AnnotatedTextView @JvmOverloads constructor(
         val lineCount = layout.lineCount
         for (line in 0 until lineCount) {
             // Get the top and the bottom of the line.
-            val top = layout.getLineTop(line).toFloat() + paddingTop
-            val bottom = layout.getLineBottom(line).toFloat() + paddingTop
-            val base = layout.getLineBaseline(line).toFloat() + paddingTop
-            val lineAscent = layout.getLineAscent(line).toFloat()
-            val lineDescent = layout.getLineDescent(line).toFloat()
+            val top = layout.getLineTop(line) + paddingTop.toFloat()
+            val bottom = layout.getLineBottom(line) + paddingTop.toFloat()
+            val base = layout.getLineBaseline(line) + paddingTop.toFloat()
+            val lineAscent = layout.getLineAscent(line)
+            val lineDescent = layout.getLineDescent(line)
 
             // Print the positions.
             println("Line $line: Top = $top, Bottom = $bottom, Base = $base, Height = $height, Ascent= $ascent/$lineAscent, Descent = $descent/$lineDescent, Leading = $leading")
@@ -174,11 +174,16 @@ class AnnotatedTextView @JvmOverloads constructor(
             val x2 = width.toFloat() / 2f
             val x3 = width.toFloat()
 
-            canvas.drawLine(x1, base, x2, base, paintBase)
-            canvas.drawLine(x1, base + ascent, x2, base + ascent, paintAsDesCent)
-            canvas.drawLine(x1, base + descent, x2, base + descent, paintAsDesCent)
+            //// base
+            //canvas.drawLine(x1, base, x2, base, paintBase)
+            //// top text
+            //canvas.drawLine(x1, base + ascent, x2, base + ascent, paintAsDesCent)
+            //// bottom text
+            //canvas.drawLine(x1, base + descent, x2, base + descent, paintAsDesCent)
 
-            canvas.drawLine(x2, top, x3, top, paintTop)
+            // top
+            canvas.drawLine(x1, top, x2, top, paintTop)
+            // bottom
             canvas.drawLine(x2, bottom, x3, bottom, paintBottom)
         }
     }
