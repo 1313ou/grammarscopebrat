@@ -21,7 +21,7 @@ object DependencyPainter {
 
     fun paintEdges(canvas: Canvas, edgeAnnotations: Collection<EdgeAnnotation>, padWidth: Float) {
 
-         // draw labels
+        // draw labels
         for (edgeAnnotation in edgeAnnotations) {
             drawEdge(canvas, edgeAnnotation, padWidth)
         }
@@ -36,8 +36,8 @@ object DependencyPainter {
 
     fun drawEdge(canvas: Canvas, edgeAnnotation: EdgeAnnotation, padWidth: Float) {
         val edge = edgeAnnotation.edge
-             println(edge)
-       if (edge.isVisible) {
+        println(edge)
+        if (edge.isVisible) {
             edge.draw(canvas, renderAsCurves)
             edge.drawTag(canvas)
         } else {

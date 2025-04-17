@@ -14,7 +14,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.setPadding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-
 class AnnotatedTextControl(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
 
     private val initialTextSize = 24f
@@ -23,7 +22,7 @@ class AnnotatedTextControl(context: Context, attrs: AttributeSet?) : ConstraintL
     private val textSizeIncrement = 2f
     private var currentTextSize = initialTextSize
 
-    private val initialSpacing = 350f
+    private val initialSpacing = 400f
     private val minSpacing = 100f
     private val maxSpacing = 750f
     private val spacingIncrement = 50f

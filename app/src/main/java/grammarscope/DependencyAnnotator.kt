@@ -17,6 +17,8 @@ import grammarscope.document.Document
 import grammarscope.document.Graph
 import grammarscope.document.GraphEdge
 import grammarscope.document.GraphNode
+import kotlin.random.Random
+import kotlin.uuid.Uuid.Companion.random
 
 /**
  * Semantic graph renderer
@@ -57,7 +59,11 @@ class DependencyAnnotator(
     /**
      * Relation palette
      */
-    private var relationPalette: (GraphEdge) -> Int = { e -> Color.DKGRAY }
+    private var relationPalette: (label: String?) -> Int = { e -> Color.DKGRAY }
+    private val random = Random.Default
+    private var relationPalette2: (label: String?) -> Int = {
+        Color.rgb(random.nextInt(), random.nextInt(), random.nextInt())
+    }
 
     fun annotate(
         document: Document,
@@ -87,16 +93,17 @@ class DependencyAnnotator(
 
             // NODES
             for (node in graph.nodes) {
+                val color: Int = relationPalette2.invoke("")
 
                 // location
                 val segment = node.segment
                 val wordBox = textView.modelToViewF(segment)
-                boxes.add(BoxAnnotation(wordBox, true))
+                boxes.add(BoxAnnotation(wordBox, color, true))
 
                 val annotationTop = wordBox.top + lineHeight
                 val annotationBottom = annotationTop + padHeight
                 val annotationBox = RectF(wordBox.left, annotationTop + padTopOffset + PAD_TOP_INSET, wordBox.right, annotationBottom - PAD_BOTTOM_INSET)
-                boxes.add(BoxAnnotation(annotationBox))
+                boxes.add(BoxAnnotation(annotationBox, color))
             }
 
             // EDGES
@@ -124,7 +131,7 @@ class DependencyAnnotator(
 
                 // data
                 val label: String? = gEdge.label
-                val color: Int = relationPalette.invoke(gEdge)
+                val color: Int = relationPalette.invoke(gEdge.label)
                 val slot = allocator.getSlot(gEdge)
                 val edgeYOffset = slot * tagSpace // relative to first slot
                 val isVisible = firstEdgeBase + edgeYOffset < lastEdgeBase

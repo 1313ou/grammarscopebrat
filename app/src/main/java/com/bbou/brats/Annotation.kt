@@ -1,19 +1,9 @@
 package com.bbou.brats
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.RectF
 import androidx.core.graphics.toColorInt
-import grammarscope.DependencyPainter.DEFAULT_OVERFLOW_COLOR
-import grammarscope.DependencyPainter.OVERFLOW_HANDLE_STROKE
-import grammarscope.DependencyPainter.OVERFLOW_HEIGHT
-import grammarscope.DependencyPainter.OVERFLOW_STROKE
-import grammarscope.DependencyPainter.OVERFLOW_STROKE_WIDTH
-import grammarscope.DependencyPainter.OVERFLOW_WIDTH
-import grammarscope.DependencyPainter.OVERFLOW_X_OFFSET
-import grammarscope.DependencyPainter.OVERFLOW_Y_OFFSET
 import grammarscope.DependencyPainter.drawEdge
 import grammarscope.Edge
 
@@ -29,17 +19,19 @@ sealed class Annotation {
 
     data class BoxAnnotation(
         val box: RectF,
+        val color: Int,
         val isToken: Boolean = false,
     ) : Annotation() {
 
         fun draw(canvas: Canvas) {
-            canvas.drawRect(box, if (isToken) boxTokenPaint else boxPaint)
+            val boxColor = color
+            canvas.drawRect(box, if (isToken) boxTokenPaint else boxPaint.apply { this.color = boxColor })
         }
 
         companion object {
             var boxPaint = Paint().apply {
                 style = Paint.Style.FILL
-                color = "#40ff0000".toColorInt()
+                //color = "#40ff0000".toColorInt()
             }
             var boxTokenPaint = Paint().apply {
                 style = Paint.Style.FILL
