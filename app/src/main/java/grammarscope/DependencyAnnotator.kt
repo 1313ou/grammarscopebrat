@@ -91,7 +91,7 @@ class DependencyAnnotator(
                 // location
                 val segment = node.segment
                 val wordBox = textView.modelToViewF(segment)
-                boxes.add(BoxAnnotation(wordBox))
+                boxes.add(BoxAnnotation(wordBox, true))
 
                 val annotationTop = wordBox.top + lineHeight
                 val annotationBottom = annotationTop + padHeight

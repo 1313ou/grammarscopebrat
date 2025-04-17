@@ -58,12 +58,7 @@ class AnnotatedTextView @JvmOverloads constructor(
     //     super.invalidate()
     // }
 
-    val hatchPaint = InterlacedHatchPaintBuilder().build(
-        angle = 45f,
-        spacing = 160f,
-        strokeWidth = 60f,
-        color = "#30000000".toColorInt(),
-    )
+    val debug = false
 
     override fun onDraw(canvas: Canvas) {
 
@@ -73,12 +68,10 @@ class AnnotatedTextView @JvmOverloads constructor(
         if (text != "") {
             dumpLineText()
             drawAnnotationSpace(canvas)
-            drawLineSpace(canvas)
+            if (debug)
+                drawLineSpace(canvas)
 
-            // hatch
-            //val rect = RectF(0f, 0f, 1000f, 1000f)
-            //canvas.drawRect(rect, hatchPaint)
-
+            // annotate
             annotate()
 
             // Draw all annotations
@@ -90,7 +83,7 @@ class AnnotatedTextView @JvmOverloads constructor(
             DependencyPainter.paintBoxes(canvas, boxAnnotations)
 
             val edgeAnnotations = annotations[AnnotationType.EDGE]!!.map { it as EdgeAnnotation }
-            DependencyPainter.paintEdges(canvas, edgeAnnotations, padWidth = width.toFloat(), renderAsCurves = true)
+            DependencyPainter.paintEdges(canvas, edgeAnnotations, padWidth = width.toFloat())
         }
     }
 
@@ -105,13 +98,6 @@ class AnnotatedTextView @JvmOverloads constructor(
     }
 
     private fun drawAnnotationSpace(canvas: Canvas) {
-        val paintRect = hatchPaint
-        //   .apply {
-        //    color = "#FFffffb0".toColorInt()
-        //    strokeWidth = 2f
-        //    style = Paint.Style.FILL
-        //}
-
         val paint: Paint = this.paint
         val fontMetrics = paint.fontMetrics
         val ascent = fontMetrics.ascent
@@ -137,7 +123,7 @@ class AnnotatedTextView @JvmOverloads constructor(
             val left: Float = layout.getLineLeft(line) + paddingLeft
             val right: Float = layout.getLineRight(line) + paddingLeft
             val rect = RectF(left, y1, right, y2)
-            canvas.drawRect(rect, paintRect)
+            canvas.drawRect(rect, hatchPaint)
         }
     }
 
@@ -216,6 +202,15 @@ class AnnotatedTextView @JvmOverloads constructor(
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         text = spannable
+    }
+
+    companion object {
+        val hatchPaint = InterlacedHatchPaintBuilder().build(
+            angle = 45f,
+            spacing = 120f,
+            strokeWidth = 60f,
+            color = "#30000000".toColorInt(),
+        )
     }
 }
 

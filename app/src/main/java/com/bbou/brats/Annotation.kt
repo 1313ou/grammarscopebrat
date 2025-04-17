@@ -3,39 +3,48 @@ package com.bbou.brats
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
+import androidx.core.graphics.toColorInt
+import grammarscope.DependencyPainter.DEFAULT_OVERFLOW_COLOR
+import grammarscope.DependencyPainter.OVERFLOW_HANDLE_STROKE
+import grammarscope.DependencyPainter.OVERFLOW_HEIGHT
+import grammarscope.DependencyPainter.OVERFLOW_STROKE
+import grammarscope.DependencyPainter.OVERFLOW_STROKE_WIDTH
+import grammarscope.DependencyPainter.OVERFLOW_WIDTH
+import grammarscope.DependencyPainter.OVERFLOW_X_OFFSET
+import grammarscope.DependencyPainter.OVERFLOW_Y_OFFSET
+import grammarscope.DependencyPainter.drawEdge
 import grammarscope.Edge
 
 // Sealed class for different types of between-lines annotations
 
 enum class AnnotationType {
+    EDGE,
     BOX,
-    EDGE
+    TOKENBOX,
 }
 
 sealed class Annotation {
 
-    abstract fun draw(canvas: Canvas, textView: AnnotatedTextView)
-
     data class BoxAnnotation(
-        val box: RectF
+        val box: RectF,
+        val isToken: Boolean = false,
     ) : Annotation() {
 
-        private val drawPaint = Paint().apply {
-            color = Color.RED
-            strokeWidth = 3f
-            style = Paint.Style.STROKE
-            isAntiAlias = true
+        fun draw(canvas: Canvas) {
+            canvas.drawRect(box, if (isToken) boxTokenPaint else boxPaint)
         }
 
-        private val fillPaint = Paint().apply {
-            color = Color.RED
-            style = Paint.Style.FILL
-            isAntiAlias = true
-        }
-
-        override fun draw(canvas: Canvas, textView: AnnotatedTextView) {
-
+        companion object {
+            var boxPaint = Paint().apply {
+                style = Paint.Style.FILL
+                color = "#40ff0000".toColorInt()
+            }
+            var boxTokenPaint = Paint().apply {
+                style = Paint.Style.FILL
+                color = "#40ffff00".toColorInt()
+            }
         }
     }
 
@@ -43,20 +52,8 @@ sealed class Annotation {
         val edge: Edge
     ) : Annotation() {
 
-        private val drawPaint = Paint().apply {
-            color = Color.RED
-            strokeWidth = 3f
-            style = Paint.Style.STROKE
-            isAntiAlias = true
-        }
-
-        private val fillPaint = Paint().apply {
-            color = Color.RED
-            style = Paint.Style.FILL
-            isAntiAlias = true
-        }
-
-        override fun draw(canvas: Canvas, textView: AnnotatedTextView) {
+        fun draw(canvas: Canvas, padWidth: Float) {
+            drawEdge(canvas, this, padWidth)
         }
 
         override fun toString(): String {

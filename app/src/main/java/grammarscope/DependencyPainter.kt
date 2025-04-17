@@ -13,61 +13,51 @@ import com.bbou.brats.Annotation.EdgeAnnotation
 
 object DependencyPainter {
 
-    fun paintBoxes(g: Canvas, boxAnnotations: Collection<BoxAnnotation>) {
+    fun paintBoxes(canvas: Canvas, boxAnnotations: Collection<BoxAnnotation>) {
         for (boxAnnotation in boxAnnotations) {
-            // drawBox(g, boxAnnotation.box)
-            g.drawRect(boxAnnotation.box, Paint().apply { color = "#40ff0000".toColorInt() })
+            boxAnnotation.draw(canvas)
         }
     }
 
-    fun paintEdges(g: Canvas, edgeAnnotations: Collection<EdgeAnnotation>, padWidth: Float, renderAsCurves: Boolean) {
+    fun paintEdges(canvas: Canvas, edgeAnnotations: Collection<EdgeAnnotation>, padWidth: Float) {
 
-         val overflowPaint = Paint().apply {
-            color = DEFAULT_OVERFLOW_COLOR
-            style = Paint.Style.STROKE
-            strokeWidth = OVERFLOW_STROKE_WIDTH
-            pathEffect = OVERFLOW_STROKE
-        }
-
-        val overflowHandlePaint = Paint().apply {
-            color = DEFAULT_OVERFLOW_COLOR
-            style = Paint.Style.STROKE
-            strokeWidth = OVERFLOW_STROKE_WIDTH
-            pathEffect = OVERFLOW_HANDLE_STROKE
-        }
-
+         // draw labels
         for (edgeAnnotation in edgeAnnotations) {
-            val edge = edgeAnnotation.edge
-            println(edge)
-
-            if (edge.isVisible) {
-                edge.draw(g, renderAsCurves)
-            } else {
-
-                // can't fit in / overflow
-                var y: Float = edge.bottom - 1F
-
-                // line
-                g.drawLine(0f, y, padWidth, y, overflowPaint)
-
-                // handle
-                y -= OVERFLOW_Y_OFFSET
-                val x = padWidth - OVERFLOW_X_OFFSET - OVERFLOW_WIDTH
-                val path = Path().apply {
-                    moveTo(x - OVERFLOW_WIDTH, y - OVERFLOW_HEIGHT)
-                    lineTo(x, y)
-                    lineTo(x + OVERFLOW_WIDTH, y - OVERFLOW_HEIGHT)
-                    close()
-                }
-                g.drawPath(path, overflowHandlePaint)
-            }
+            drawEdge(canvas, edgeAnnotation, padWidth)
         }
 
         // draw labels
-        for (edgeAnnotation in edgeAnnotations) {
-            if (edgeAnnotation.edge.isVisible) {
-                edgeAnnotation.edge.drawTag(g)
+        //for (edgeAnnotation in edgeAnnotations) {
+        //    if (edgeAnnotation.edge.isVisible) {
+        //        edgeAnnotation.edge.drawTag(canvas)
+        //    }
+        //}
+    }
+
+    fun drawEdge(canvas: Canvas, edgeAnnotation: EdgeAnnotation, padWidth: Float) {
+        val edge = edgeAnnotation.edge
+             println(edge)
+       if (edge.isVisible) {
+            edge.draw(canvas, renderAsCurves)
+            edge.drawTag(canvas)
+        } else {
+
+            // can't fit in / overflow
+            var y: Float = edge.bottom - 1F
+
+            // line
+            canvas.drawLine(0f, y, padWidth, y, overflowPaint)
+
+            // handle
+            y -= OVERFLOW_Y_OFFSET
+            val x = padWidth - OVERFLOW_X_OFFSET - OVERFLOW_WIDTH
+            val path = Path().apply {
+                moveTo(x - OVERFLOW_WIDTH, y - OVERFLOW_HEIGHT)
+                lineTo(x, y)
+                lineTo(x + OVERFLOW_WIDTH, y - OVERFLOW_HEIGHT)
+                close()
             }
+            canvas.drawPath(path, overflowHandlePaint)
         }
     }
 
@@ -104,6 +94,9 @@ object DependencyPainter {
         // g.drawLine(boxL, boxT, boxR, boxT) // pad topOffset
         // g.drawLine(boxL, boxB, boxR, boxB) // pad bottom
     }
+
+    var renderAsCurves = true
+
     /**
      * Back color
      */
@@ -152,4 +145,18 @@ object DependencyPainter {
 
     val AXIS_STROKE: PathEffect? = SOLID
     val SPAN_STROKE: PathEffect? = SOLID
+
+    val overflowPaint = Paint().apply {
+        color = DEFAULT_OVERFLOW_COLOR
+        style = Paint.Style.STROKE
+        strokeWidth = OVERFLOW_STROKE_WIDTH
+        pathEffect = OVERFLOW_STROKE
+    }
+
+    val overflowHandlePaint = Paint().apply {
+        color = DEFAULT_OVERFLOW_COLOR
+        style = Paint.Style.STROKE
+        strokeWidth = OVERFLOW_STROKE_WIDTH
+        pathEffect = OVERFLOW_HANDLE_STROKE
+    }
 }
