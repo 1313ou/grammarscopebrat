@@ -2,6 +2,7 @@ package grammarscope
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Paint.FontMetrics
 import android.graphics.Path
 
 object Utils {
@@ -49,7 +50,7 @@ object Utils {
         drawPath(trianglePath, paint)
     }
 
-    fun triangle(x0: Float, y0: Float, w: Float, h2: Float, reverse: Boolean): Path {
+    private fun triangle(x0: Float, y0: Float, w: Float, h2: Float, reverse: Boolean): Path {
         val x1 = x0 + (if (reverse) w else -w)
         return Path().apply {
             moveTo(x0, y0)
@@ -70,4 +71,17 @@ object Utils {
         val y2 = y0 + r
         drawOval(x1, y1, x2, y2, paint)
     }
+
+    fun Canvas.drawEllipse(x: Float, y: Float) {}
+
+    fun Canvas.drawUpwardTriangle(x: Float, y: Float, dx: Float, dy: Float, color: Int ) {}
+
+
+    @JvmStatic
+    fun FontMetrics.height(): Float {
+        return descent - ascent + leading // precise line height information, and be sure you're including the inter-line spacing
+        // return fontSpacing // a quick approximation of the line height.
+    }
+
+
 }

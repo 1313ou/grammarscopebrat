@@ -2,7 +2,6 @@ package grammarscope
 
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Paint.FontMetrics
 import android.graphics.Rect
 import android.graphics.RectF
 import android.widget.TextView
@@ -12,13 +11,13 @@ import com.bbou.brats.Annotation.EdgeAnnotation
 import com.bbou.brats.AnnotationType
 import com.bbou.brats.modelToViewF
 import grammarscope.Edge.Companion.makeEdge
+import grammarscope.Utils.height
 import grammarscope.allocator.Allocator
 import grammarscope.document.Document
 import grammarscope.document.Graph
 import grammarscope.document.GraphEdge
 import grammarscope.document.GraphNode
 import kotlin.random.Random
-import kotlin.uuid.Uuid.Companion.random
 
 /**
  * Semantic graph renderer
@@ -239,13 +238,7 @@ class DependencyAnnotator(
 
     companion object {
 
-        @JvmStatic
-        fun FontMetrics.height(): Float {
-            return descent - ascent + leading // precise line height information, and be sure you're including the inter-line spacing
-            // return fontSpacing // a quick approximation of the line height.
-        }
-
-        // INSETS / MARGINS / OFFSETS
+         // INSETS / MARGINS / OFFSETS
 
         private const val PAD_TOP_INSET = 4
 

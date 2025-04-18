@@ -49,4 +49,10 @@ interface Document {
     fun getGraph(sentenceIdx: Int): Graph<GraphNode, GraphEdge>
 
     fun split(segment1: Segment, segment2: Segment): MutableList<Segment>
+
+    fun split(segment: Segment): MutableList<Segment>
+
+    fun getPos(sentenceIdx: Int, word: Segment): String
+
+    fun getSentenceSegment(sentenceIdx: Int): Segment
 }
